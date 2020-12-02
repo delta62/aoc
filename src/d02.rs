@@ -1,4 +1,5 @@
 use regex::Regex;
+use std::str::FromStr;
 
 struct PasswordEntry {
     min: usize,
@@ -7,21 +8,29 @@ struct PasswordEntry {
     password: String,
 }
 
+impl FromStr for PasswordEntry {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"(\d+)-(\d+) ([a-zA-Z]): (.*)").unwrap();
+        }
+
+        let captures = RE.captures(s).ok_or(())?;
+        let min = captures[1].parse::<usize>().unwrap();
+        let max = captures[2].parse::<usize>().unwrap();
+        let ch = captures[3].parse::<char>().unwrap();
+        let password = captures[4].to_string();
+
+        Ok(Self { min, max, ch, password })
+    }
+}
+
 #[aoc_generator(day2)]
 fn parse(input: &str) -> Vec<PasswordEntry> {
-    let re = Regex::new(r"(\d+)-(\d+) ([a-zA-Z]): (.*)").unwrap();
-
     input
         .split('\n')
-        .map(|line| {
-            let captures = re.captures(line).unwrap();
-            let min = captures[1].parse::<usize>().unwrap();
-            let max = captures[2].parse::<usize>().unwrap();
-            let ch = captures[3].parse::<char>().unwrap();
-            let password = captures[4].to_string();
-
-            PasswordEntry { min, max, ch, password }
-        })
+        .map(|line| PasswordEntry::from_str(line).unwrap())
         .collect()
 }
 
