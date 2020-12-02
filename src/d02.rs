@@ -9,16 +9,16 @@ struct PasswordEntry {
 
 #[aoc_generator(day2)]
 fn parse(input: &str) -> Vec<PasswordEntry> {
-    let re = Regex::new(r"^(\d+)-(\d+) ([a-zA-Z]): (.*)$").unwrap();
+    let re = Regex::new(r"(\d+)-(\d+) ([a-zA-Z]): (.*)").unwrap();
 
     input
         .split('\n')
         .map(|line| {
             let captures = re.captures(line).unwrap();
-            let min = captures.get(1).unwrap().as_str().parse::<usize>().unwrap();
-            let max = captures.get(2).unwrap().as_str().parse::<usize>().unwrap();
-            let ch = captures.get(3).unwrap().as_str().parse::<char>().unwrap();
-            let password = captures.get(4).unwrap().as_str().to_string();
+            let min = captures[1].parse::<usize>().unwrap();
+            let max = captures[2].parse::<usize>().unwrap();
+            let ch = captures[3].parse::<char>().unwrap();
+            let password = captures[4].to_string();
 
             PasswordEntry { min, max, ch, password }
         })
@@ -42,13 +42,13 @@ fn solve_part2(input: &[PasswordEntry]) -> usize {
         .iter()
         .filter(|entry| {
             let mut chars = entry.password.chars();
-            let min = chars.nth(entry.min - 1);
-            let max = chars.nth(entry.max - entry.min - 1);
+            let fst = chars.nth(entry.min - 1).unwrap();
+            let snd = chars.nth(entry.max - entry.min - 1).unwrap();
 
-            match (min, max) {
-                (Some(x), Some(y)) if x == y && x == entry.ch => false,
-                (Some(c), _) if c == entry.ch => true,
-                (_, Some(c)) if c == entry.ch => true,
+            match (fst, snd) {
+                (x, y) if x == y => false,
+                (c, _) if c == entry.ch => true,
+                (_, c) if c == entry.ch => true,
                 _ => false,
             }
         })
