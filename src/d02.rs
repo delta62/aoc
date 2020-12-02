@@ -1,54 +1,47 @@
 use regex::Regex;
-use std::str::FromStr;
 
-struct PasswordEntry {
+struct PasswordEntry<'a> {
     min: usize,
     max: usize,
     ch: char,
-    password: String,
+    password: &'a str,
 }
 
-impl FromStr for PasswordEntry {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+impl<'a> PasswordEntry<'a> {
+    fn new(line: &'a str) -> Self {
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"(\d+)-(\d+) ([a-zA-Z]): (.*)").unwrap();
+            static ref RE: Regex = Regex::new(r"^(\d+)-(\d+) ([a-zA-Z]): (.*)$").unwrap();
         }
 
-        let captures = RE.captures(s).ok_or(())?;
+        let captures = RE.captures(line).unwrap();
         let min = captures[1].parse::<usize>().unwrap();
         let max = captures[2].parse::<usize>().unwrap();
         let ch = captures[3].parse::<char>().unwrap();
-        let password = captures[4].to_string();
+        let password = captures.get(4).unwrap().as_str();
 
-        Ok(Self { min, max, ch, password })
+        Self { min, max, ch, password }
     }
 }
 
-#[aoc_generator(day2)]
-fn parse(input: &str) -> Vec<PasswordEntry> {
+#[aoc(day2, part1)]
+fn solve_part1(input: &str) -> usize {
     input
         .split('\n')
-        .map(|line| PasswordEntry::from_str(line).unwrap())
-        .collect()
-}
-
-#[aoc(day2, part1)]
-fn solve_part1(input: &[PasswordEntry]) -> usize {
-    input
-        .iter()
+        .map(|line| PasswordEntry::new(line))
         .filter(|entry| {
-            let matches = entry.password.as_str().match_indices(entry.ch).count();
+            let matches = entry.password.chars().fold(0, |acc, c| {
+                if c == entry.ch { acc + 1 } else { acc }
+            });
             matches >= entry.min && matches <= entry.max
         })
         .count()
 }
 
 #[aoc(day2, part2)]
-fn solve_part2(input: &[PasswordEntry]) -> usize {
+fn solve_part2(input: &str) -> usize {
     input
-        .iter()
+        .split('\n')
+        .map(|line| PasswordEntry::new(line))
         .filter(|entry| {
             let mut chars = entry.password.chars();
             let fst = chars.nth(entry.min - 1).unwrap();
@@ -73,7 +66,6 @@ mod tests {
         let input = r"1-3 a: abcde
 1-3 b: cdefg
 2-9 c: ccccccccc";
-        let input = parse(input);
         let result = solve_part1(&input);
         assert_eq!(result, 2);
     }
@@ -83,7 +75,6 @@ mod tests {
         let input = r"1-3 a: abcde
 1-3 b: cdefg
 2-9 c: ccccccccc";
-        let input = parse(input);
         let result = solve_part2(&input);
         assert_eq!(result, 1);
     }
