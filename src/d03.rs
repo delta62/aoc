@@ -35,6 +35,18 @@ fn parse(input: &str) -> Slope {
 
 #[aoc(day3, part1)]
 fn solve_part1(slope: &Slope) -> usize {
+    solve_slope(slope, 3, 1)
+}
+
+#[aoc(day3, part2)]
+fn solve_part2(slope: &Slope) -> usize {
+    [ (1, 1), (3, 1), (5, 1), (7, 1), (1, 2) ]
+        .iter()
+        .map(|(dx, dy)| solve_slope(slope, *dx, *dy))
+        .product()
+}
+
+fn solve_slope(slope: &Slope, dx: usize, dy: usize) -> usize {
     let mut tree_sum = 0;
     let mut col = 0;
     let mut row = 0;
@@ -43,8 +55,8 @@ fn solve_part1(slope: &Slope) -> usize {
         if slope.tree_at(row, col) {
             tree_sum += 1;
         }
-        row += 1;
-        col = (col + 3) % slope.width;
+        row += dy;
+        col = (col + dx) % slope.width;
     }
 
     tree_sum
@@ -71,5 +83,24 @@ mod tests {
         let slope = parse(input);
         let result = solve_part1(&slope);
         assert_eq!(result, 7);
+    }
+
+    #[test]
+    fn ex2() {
+        let input = r"..##.......
+#...#...#..
+.#....#..#.
+..#.#...#.#
+.#...##..#.
+..#.##.....
+.#.#.#....#
+.#........#
+#.##...#...
+#...##....#
+.#..#...#.#";
+
+        let slope = parse(input);
+        let result = solve_part2(&slope);
+        assert_eq!(result, 336);
     }
 }
