@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 const TARGET: u32 = 2020;
 
 #[aoc_generator(day1)]
@@ -11,34 +9,52 @@ fn part1(input: &str) -> Vec<u32> {
 }
 
 #[aoc(day1, part1)]
-fn solve_part1(input: &[u32]) -> Option<u32> {
-    let mut seen = HashSet::new();
+fn solve_part1(input: &[u32]) -> u32 {
 
-    for x in input {
-        if seen.contains(&(TARGET - x)) {
-            return Some(x * (TARGET - x))
+    // Sort the list in descending order
+    let mut sorted = vec![0; input.len()];
+    sorted[..].copy_from_slice(input);
+    sorted.sort_unstable_by_key(|x| u32::MAX - x);
+
+    for big in sorted.iter() {
+        // Walk in from the end of the list
+        for small in sorted.iter().rev() {
+            if big + small == TARGET {
+                return big * small;
+            }
+
+            if big + small > TARGET {
+                break;
+            }
         }
-        seen.insert(x);
     }
 
-    None
+    panic!("Sum not found!");
 }
 
 #[aoc(day1, part2)]
-fn solve_part2(input: &[u32]) -> Option<u32> {
-    let mut seen = HashSet::new();
+fn solve_part2(input: &[u32]) -> u32 {
 
-    for x in input {
-        for y in input {
-            if seen.contains(&(TARGET - x - y)) {
-                return Some(x * y * (TARGET - x - y));
+    // Sort the list in descending order
+    let mut sorted = vec![0; input.len()];
+    sorted[..].copy_from_slice(input);
+    sorted.sort_unstable_by_key(|x| u32::MAX - x);
+
+    for big in sorted.iter() {
+        for middle in sorted[1..].iter() {
+            for small in sorted.iter().rev() {
+                if big + middle + small == TARGET {
+                    return big * middle * small;
+                }
+
+                if big + middle + small > TARGET {
+                    break;
+                }
             }
-            seen.insert(y);
         }
-        seen.clear();
     }
 
-    None
+    panic!("Sum not found!");
 }
 
 #[cfg(test)]
@@ -46,16 +62,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn ex1() {
+    fn day1_ex1() {
         let input = vec![ 1721, 979, 366, 299, 675, 1456 ];
         let result = solve_part1(input.as_slice());
-        assert_eq!(result, Some(514579));
+        assert_eq!(result, 514579);
     }
 
-    // #[test]
-    // fn ex2() {
-    //     let input = vec![ 1721, 979, 366, 299, 675, 1456 ];
-    //     let result = solve_part2(input.as_slice());
-    //     assert_eq!(result, Some(241861950));
-    // }
+    #[test]
+    fn day1_ex2() {
+        let input = vec![ 1721, 979, 366, 299, 675, 1456 ];
+        let result = solve_part2(input.as_slice());
+        assert_eq!(result, 241861950);
+    }
 }
