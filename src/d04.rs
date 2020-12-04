@@ -16,8 +16,10 @@ enum Field {
 
 use Field::*;
 
+struct ParseError;
+
 impl FromStr for Field {
-    type Err = ();
+    type Err = ParseError;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         lazy_static! {
@@ -63,7 +65,7 @@ impl FromStr for Field {
             "ecl" => Ok(Field::Ecl(EYE.is_match(val))),
             "pid" => Ok(Field::Pid(PID.is_match(val))),
             "cid" => Ok(Field::Cid),
-            _ => Err(()),
+            _ => Err(ParseError),
         }
     }
 }
