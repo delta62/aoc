@@ -73,13 +73,13 @@ struct Passport {
 }
 
 impl Passport {
-    pub fn new() -> Self {
-        let fields = HashSet::new();
-        Self { fields }
-    }
+    pub fn new<I: IntoIterator<Item = Field>>(data: I) -> Self {
+        let mut fields = HashSet::new();
+        for field in data {
+            fields.insert(field);
+        }
 
-    fn add_field(&mut self, field: Field) {
-        self.fields.insert(field);
+        Self { fields }
     }
 
     fn has_required_fields(&self) -> bool {
@@ -103,15 +103,17 @@ fn parse(input: &str) -> Vec<Passport> {
 
     for line in input.lines() {
         if line.is_empty() {
-            let mut p = Passport::new();
-            tokens.drain(..).for_each(|token| p.add_field(token));
-            passports.push(p);
+            passports.push(Passport::new(tokens.drain(..)));
         } else {
             line
                 .split_whitespace()
                 .filter_map(|x| Field::from_str(x).ok())
                 .for_each(|t| tokens.push(t))
         }
+    }
+
+    if !tokens.is_empty() {
+        passports.push(Passport::new(tokens.drain(..)));
     }
 
     passports
@@ -151,8 +153,7 @@ ecl:brn pid:760753108 byr:1931
 hgt:179cm
 
 hcl:#cfa07d eyr:2025 pid:166559648
-iyr:2011 ecl:brn hgt:59in
-";
+iyr:2011 ecl:brn hgt:59in";
 
         let input = parse(input);
         let result = solve_part1(&input);
@@ -193,9 +194,7 @@ hgt:164cm byr:2001 iyr:2015 cid:88
 pid:545766238 ecl:hzl
 eyr:2022
 
-iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
-
-";
+iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719";
 
         let input = parse(input);
         let result = solve_part2(&input);
