@@ -1,14 +1,16 @@
+use std::collections::HashSet;
 use std::str::FromStr;
 
 struct Slope {
     width: usize,
     height: usize,
-    data: Vec<Vec<bool>>,
+    data: HashSet<usize>,
 }
 
 impl Slope {
     fn tree_at(&self, row: usize, col: usize) -> bool {
-        self.data[row][col]
+        let pos = row * self.width + col;
+        self.data.contains(&pos)
     }
 }
 
@@ -16,13 +18,31 @@ impl FromStr for Slope {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let data: Vec<Vec<bool>> = s
-            .split('\n')
-            .map(|line| line.chars().map(|c| c == '#').collect())
-            .collect();
+        let mut width = 0;
+        let mut height = 0;
+        let mut data = HashSet::new();
 
-        let width = data[0].len();
-        let height = data.len();
+        for (i, c) in s.char_indices() {
+            match c {
+                '#' => {
+                    let (row, col) = if width == 0 {
+                        (0, i)
+                    } else {
+                        let c_pos = i - height;
+                        (c_pos / width, c_pos % width)
+                    };
+                    let pos = width * row + col;
+                    data.insert(pos);
+                }
+                '\n' => {
+                    if width == 0 {
+                        width = i;
+                    }
+                    height += 1;
+                }
+                _ => { }
+            }
+        }
 
         Ok(Self { width, height, data })
     }
@@ -78,7 +98,8 @@ mod tests {
 .#........#
 #.##...#...
 #...##....#
-.#..#...#.#";
+.#..#...#.#
+";
 
         let slope = parse(input);
         let result = solve_part1(&slope);
@@ -97,7 +118,8 @@ mod tests {
 .#........#
 #.##...#...
 #...##....#
-.#..#...#.#";
+.#..#...#.#
+";
 
         let slope = parse(input);
         let result = solve_part2(&slope);
