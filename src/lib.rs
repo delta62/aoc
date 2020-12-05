@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate aoc_runner_derive;
-#[macro_use]
-extern crate lazy_static;
+use aoc_runner_derive::aoc_lib;
 
 mod d01;
 mod d02;

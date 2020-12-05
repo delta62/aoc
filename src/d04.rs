@@ -1,3 +1,5 @@
+use aoc_runner_derive::{aoc, aoc_generator};
+use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashSet;
 use std::str::FromStr;

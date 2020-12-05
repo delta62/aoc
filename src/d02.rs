@@ -1,3 +1,5 @@
+use aoc_runner_derive::aoc;
+use lazy_static::lazy_static;
 use regex::Regex;
 
 struct PasswordEntry<'a> {

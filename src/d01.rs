@@ -1,3 +1,5 @@
+use aoc_runner_derive::{aoc, aoc_generator};
+
 const TARGET: u32 = 2020;
 
 #[aoc_generator(day1)]
