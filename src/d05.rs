@@ -59,7 +59,9 @@ fn parse(input: &str) -> Vec<Seat> {
 fn solve_part1(input: &[Seat]) -> usize {
     input
         .iter()
-        .fold(0, |acc, seat| max(seat.id(), acc))
+        .map(|seat| seat.id())
+        .max()
+        .unwrap()
 }
 
 #[aoc(day5, part2)]
