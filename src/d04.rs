@@ -16,6 +16,7 @@ enum Field {
 
 use Field::*;
 
+#[derive(PartialEq, Debug)]
 struct ParseError;
 
 impl FromStr for Field {
