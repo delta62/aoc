@@ -6,7 +6,7 @@ const TARGET: isize = 2020;
 #[aoc_generator(day1)]
 fn part1(input: &str) -> Vec<isize> {
     input
-        .split('\n')
+        .lines()
         .map(|x| x.parse::<isize>().unwrap())
         .collect()
 }

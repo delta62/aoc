@@ -28,7 +28,7 @@ impl<'a> PasswordEntry<'a> {
 #[aoc(day2, part1)]
 fn solve_part1(input: &str) -> usize {
     input
-        .split('\n')
+        .lines()
         .map(|line| PasswordEntry::new(line))
         .filter(|entry| {
             let matches = entry.password.chars().fold(0, |acc, c| {
