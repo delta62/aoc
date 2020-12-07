@@ -1,62 +1,44 @@
 use aoc_runner_derive::{aoc, aoc_generator};
+use std::collections::HashSet;
 
-const TARGET: u32 = 2020;
+const TARGET: isize = 2020;
 
 #[aoc_generator(day1)]
-fn part1(input: &str) -> Vec<u32> {
+fn part1(input: &str) -> Vec<isize> {
     input
         .split('\n')
-        .map(|x| x.parse::<u32>().unwrap())
+        .map(|x| x.parse::<isize>().unwrap())
         .collect()
 }
 
 #[aoc(day1, part1)]
-fn solve_part1(input: &[u32]) -> u32 {
-
-    // Sort the list in descending order
-    let mut sorted = vec![0; input.len()];
-    sorted[..].copy_from_slice(input);
-    sorted.sort_unstable_by_key(|x| u32::MAX - x);
-
-    for big in sorted.iter() {
-        // Walk in from the end of the list
-        for small in sorted.iter().rev() {
-            if big + small == TARGET {
-                return big * small;
-            }
-
-            if big + small > TARGET {
-                break;
-            }
-        }
-    }
-
-    panic!("Sum not found!");
+fn solve_part1(input: &[isize]) -> isize {
+    two_sum(input, TARGET)
+        .map(|(x, y)| x * y)
+        .unwrap()
 }
 
 #[aoc(day1, part2)]
-fn solve_part2(input: &[u32]) -> u32 {
+fn solve_part2(input: &[isize]) -> isize {
+    input
+        .iter()
+        .find_map(|z| {
+            two_sum(input, TARGET - z).map(|(x, y)| x * y * z)
+        })
+        .unwrap()
+}
 
-    // Sort the list in descending order
-    let mut sorted = vec![0; input.len()];
-    sorted[..].copy_from_slice(input);
-    sorted.sort_unstable_by_key(|x| u32::MAX - x);
-
-    for big in sorted.iter() {
-        for middle in sorted[1..].iter() {
-            for small in sorted.iter().rev() {
-                if big + middle + small == TARGET {
-                    return big * middle * small;
-                }
-
-                if big + middle + small > TARGET {
-                    break;
-                }
-            }
-        }
-    }
-
-    panic!("Sum not found!");
+fn two_sum(input: &[isize], target: isize) -> Option<(isize, isize)> {
+    let mut seen = HashSet::new();
+    input
+        .iter()
+        .find_map(|x| {
+            let x = *x;
+            let wanted = target - x;
+            let ret = seen.get(&wanted).map(|_| (x, wanted));
+            seen.insert(x);
+            ret
+        })
 }
 
 #[cfg(test)]
