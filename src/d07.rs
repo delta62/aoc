@@ -57,7 +57,7 @@ fn solve_part1(input: &str) -> usize {
     let mut search = Bfs::new(&graph, *goal);
 
     let mut sum = 0;
-    while let Some(n) = search.next(&graph) {
+    while search.next(&graph).is_some() {
         sum += 1;
     }
 
@@ -66,7 +66,7 @@ fn solve_part1(input: &str) -> usize {
 
 #[aoc(day7, part2)]
 fn solve_part2(input: &str) -> usize {
-    let (mut graph, nodes) = parse(input);
+    let (graph, nodes) = parse(input);
     let goal = nodes.get("shiny gold").unwrap();
 
     find_cost(&graph, &goal) - 1
