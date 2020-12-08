@@ -1,71 +1,12 @@
-use aoc_runner_derive::{aoc, aoc_generator};
+use aoc_runner_derive::aoc;
 use lazy_static::lazy_static;
+use petgraph::{graph::NodeIndex, visit::Bfs, Graph};
 use regex::Regex;
-use std::collections::HashSet;
+use std::collections::HashMap;
 
-struct Node {
-    val: String,
-    parents: HashSet<usize>,
-}
-
-impl Node {
-    fn new(val: String) -> Self {
-        Self {
-            val,
-            parents: HashSet::new(),
-        }
-    }
-}
-
-struct Graph {
-    nodes: Vec<Node>,
-}
-
-impl Graph {
-    fn new() -> Self {
-        Self {
-            nodes: Vec::new()
-        }
-    }
-
-    fn contains(&self, val: &str) -> bool {
-        self.nodes.iter().any(|n| n.val.as_str() == val)
-    }
-
-    fn insert(&mut self, val: String) {
-        self.nodes.push(Node::new(val));
-    }
-
-    fn get_points_to(&self, val: &str) -> Vec<&str> {
-        match self.nodes.iter().find(|n| n.val.as_str() == val) {
-            Some(node) => {
-                node.parents
-                    .iter()
-                    .map(|idx| self.nodes[*idx].val.as_str())
-                    .collect()
-            }
-            None => Vec::new(),
-        }
-    }
-
-    fn set_parent(&mut self, parent: &str, child: &str) {
-        let child_idx = self.nodes
-            .iter()
-            .position(|n| n.val.as_str() == child)
-            .unwrap();
-
-        let parent_idx = self.nodes
-            .iter()
-            .position(|n| n.val.as_str() == parent)
-            .unwrap();
-
-        self.nodes[child_idx].parents.insert(parent_idx);
-    }
-}
-
-#[aoc_generator(day7)]
-fn parse(input: &str) -> Graph {
+fn parse(input: &str) -> (Graph<&str, usize>, HashMap<&str, NodeIndex>) {
     let mut graph = Graph::new();
+    let mut nodes = HashMap::new();
 
     input
         .lines()
@@ -75,54 +16,73 @@ fn parse(input: &str) -> Graph {
             }
 
             let mut parts = line.split(" bags contain ");
-            let parent = parts.next().unwrap().to_string();
+            let parent = parts.next().unwrap();
             let parts = parts.next().unwrap().split(", ");
 
-            if !graph.contains(&parent) {
-                graph.insert(parent.clone());
-            }
+            let parent_idx = if !nodes.contains_key(parent) {
+                let idx = graph.add_node(parent);
+                nodes.insert(parent, idx);
+                idx
+            } else {
+                *nodes.get(parent).unwrap()
+            };
 
             for child in parts {
                 if let Some(captures) = RE.captures(child) {
-                    let _count = captures[1].parse::<usize>().unwrap();
-                    let color = captures[2].to_string();
+                    let count = captures[1].parse::<usize>().unwrap();
+                    let color = captures.get(2).unwrap().as_str();
 
-                    if !graph.contains(&color) {
-                        graph.insert(color.clone());
-                    }
+                    let child_idx = if !nodes.contains_key(color) {
+                        let idx = graph.add_node(color);
+                        nodes.insert(color, idx);
+                        idx
+                    } else {
+                        *nodes.get(color).unwrap()
+                    };
 
-                    graph.set_parent(&parent, &color);
+                    graph.add_edge(parent_idx, child_idx, count);
                 }
             }
         });
 
-    graph
+    (graph, nodes)
 }
 
 #[aoc(day7, part1)]
-fn solve_part1(input: &Graph) -> usize {
-    let mut points_to = HashSet::new();
-    let mut todo = Vec::new();
+fn solve_part1(input: &str) -> usize {
+    let (mut graph, nodes) = parse(input);
+    let goal = nodes.get("shiny gold").unwrap();
+    graph.reverse();
 
-    todo.push("shiny gold");
+    let mut search = Bfs::new(&graph, *goal);
 
-    while !todo.is_empty() {
-        let goal = todo.pop().unwrap();
-        let parents = input.get_points_to(goal);
-        for parent in parents {
-            todo.push(parent);
-            // println!("{} points to {}", parent, goal);
-            points_to.insert(parent);
-        }
+    let mut sum = 0;
+    while let Some(n) = search.next(&graph) {
+        sum += 1;
     }
 
-    points_to.len()
+    sum - 1
 }
 
-// #[aoc(day7, part2)]
-// fn solve_part2(input: &Graph) -> usize {
-//     42
-// }
+#[aoc(day7, part2)]
+fn solve_part2(input: &str) -> usize {
+    let (mut graph, nodes) = parse(input);
+    let goal = nodes.get("shiny gold").unwrap();
+
+    find_cost(&graph, &goal) - 1
+}
+
+fn find_cost(graph: &Graph<&str, usize>, from: &NodeIndex) -> usize {
+    let mut sum = 1;
+
+    for to in graph.neighbors(*from) {
+        let edge = graph.find_edge(*from, to).unwrap();
+        let edge_cost = graph.edge_weight(edge).unwrap();
+        sum += edge_cost * find_cost(graph, &to);
+    }
+
+    sum
+}
 
 #[cfg(test)]
 mod tests {
@@ -140,12 +100,21 @@ vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
 faded blue bags contain no other bags.
 dotted black bags contain no other bags.";
 
-        let input = parse(input);
         let res = solve_part1(&input);
         assert_eq!(res, 4);
     }
 
     #[test]
     fn ex2() {
+        let input = r"shiny gold bags contain 2 dark red bags.
+dark red bags contain 2 dark orange bags.
+dark orange bags contain 2 dark yellow bags.
+dark yellow bags contain 2 dark green bags.
+dark green bags contain 2 dark blue bags.
+dark blue bags contain 2 dark violet bags.
+dark violet bags contain no other bags.";
+
+        let res = solve_part2(input);
+        assert_eq!(res, 126);
     }
 }
