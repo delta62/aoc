@@ -93,36 +93,21 @@ fn solve_part2(input: &[Op]) -> isize {
     let mut prog = Program::new();
 
     for (i, op) in input.iter().enumerate() {
-        if let Op::Jmp(x) = op {
-            let mut test_input = Vec::new();
-            for x in input {
-                test_input.push(*x);
+        let mut test_input = Vec::from(input);
+        match op {
+            Op::Jmp(x) => {
+                test_input[i] = Op::Nop(*x);
             }
-
-            test_input[i] = Op::Nop(*x);
-
-            if let Ok(acc) = prog.run(&test_input) {
-                return acc;
-            } else {
-                prog.reset();
+            Op::Nop(x) => {
+                test_input[i] = Op::Jmp(*x);
             }
+            _ => continue,
         }
-    }
 
-    for (i, op) in input.iter().enumerate() {
-        if let Op::Nop(x) = op {
-            let mut test_input = Vec::new();
-            for x in input {
-                test_input.push(*x);
-            }
-
-            test_input[i] = Op::Jmp(*x);
-
-            if let Ok(acc) = prog.run(&test_input) {
-                return acc;
-            } else {
-                prog.reset();
-            }
+        if let Ok(acc) = prog.run(&test_input) {
+            return acc;
+        } else {
+            prog.reset();
         }
     }
 
