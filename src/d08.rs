@@ -3,13 +3,13 @@ use std::collections::HashSet;
 use std::str::FromStr;
 
 #[derive(Copy, Clone)]
-enum Instruction {
+enum Op {
     Nop(isize),
     Acc(isize),
     Jmp(isize),
 }
 
-impl FromStr for Instruction {
+impl FromStr for Op {
     type Err = ();
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
@@ -18,10 +18,10 @@ impl FromStr for Instruction {
         let addr = parts.next().unwrap().parse::<isize>().unwrap();
 
         match op {
-            "nop" => Ok(Instruction::Nop(addr)),
-            "acc" => Ok(Instruction::Acc(addr)),
-            "jmp" => Ok(Instruction::Jmp(addr)),
-            _ => Err(()),
+            "nop" => Ok(Op::Nop(addr)),
+            "acc" => Ok(Op::Acc(addr)),
+            "jmp" => Ok(Op::Jmp(addr)),
+            _     => Err(()),
         }
     }
 }
@@ -41,58 +41,31 @@ impl Program {
         }
     }
 
-    fn run_no_repeat(&mut self, ops: &[Instruction]) -> isize {
+    fn run(&mut self, ops: &[Op]) -> Result<isize, isize> {
         loop {
             if self.done.contains(&self.pc) {
-                return self.acc
-            }
-
-            self.done.insert(self.pc);
-            let op = &ops[self.pc];
-
-            match op {
-                Instruction::Nop(_) => {
-                    self.pc += 1;
-                }
-                Instruction::Acc(x) => {
-                    self.acc += x;
-                    self.pc += 1;
-                }
-                Instruction::Jmp(x) => {
-                    self.pc = ((self.pc as isize) + (*x as isize)) as usize;
-                }
-            }
-        }
-    }
-
-    fn run(&mut self, ops: &[Instruction]) -> Result<isize, ()> {
-        loop {
-            if self.done.contains(&self.pc) {
-                return Err(());
+                return Err(self.acc);
             }
 
             if self.pc == ops.len() {
-                break;
+                return Ok(self.acc);
             }
 
             self.done.insert(self.pc);
-            let op = &ops[self.pc];
 
-            match op {
-                Instruction::Nop(_) => {
+            match &ops[self.pc] {
+                Op::Nop(_) => {
                     self.pc += 1;
                 }
-                Instruction::Acc(x) => {
+                Op::Acc(x) => {
                     self.acc += x;
                     self.pc += 1;
                 }
-                Instruction::Jmp(x) => {
+                Op::Jmp(x) => {
                     self.pc = ((self.pc as isize) + (*x as isize)) as usize;
                 }
             }
         }
-
-        Ok(self.acc)
     }
 
     fn reset(&mut self) {
@@ -103,30 +76,30 @@ impl Program {
 }
 
 #[aoc_generator(day8)]
-fn parse(input: &str) -> Vec<Instruction> {
+fn parse(input: &str) -> Vec<Op> {
     input
         .lines()
-        .map(|line| Instruction::from_str(line).unwrap())
+        .map(|line| Op::from_str(line).unwrap())
         .collect()
 }
 
 #[aoc(day8, part1)]
-fn solve_part1(input: &[Instruction]) -> isize {
-    Program::new().run_no_repeat(input)
+fn solve_part1(input: &[Op]) -> isize {
+    Program::new().run(input).unwrap_err()
 }
 
 #[aoc(day8, part2)]
-fn solve_part2(input: &[Instruction]) -> isize {
+fn solve_part2(input: &[Op]) -> isize {
     let mut prog = Program::new();
 
     for (i, op) in input.iter().enumerate() {
-        if let Instruction::Jmp(x) = op {
+        if let Op::Jmp(x) = op {
             let mut test_input = Vec::new();
             for x in input {
                 test_input.push(*x);
             }
 
-            test_input[i] = Instruction::Nop(*x);
+            test_input[i] = Op::Nop(*x);
 
             if let Ok(acc) = prog.run(&test_input) {
                 return acc;
@@ -137,13 +110,13 @@ fn solve_part2(input: &[Instruction]) -> isize {
     }
 
     for (i, op) in input.iter().enumerate() {
-        if let Instruction::Nop(x) = op {
+        if let Op::Nop(x) = op {
             let mut test_input = Vec::new();
             for x in input {
                 test_input.push(*x);
             }
 
-            test_input[i] = Instruction::Jmp(*x);
+            test_input[i] = Op::Jmp(*x);
 
             if let Ok(acc) = prog.run(&test_input) {
                 return acc;
