@@ -28,7 +28,7 @@ fn solve_part2(input: &[isize]) -> isize {
         .unwrap()
 }
 
-fn two_sum(input: &[isize], target: isize) -> Option<(isize, isize)> {
+pub fn two_sum(input: &[isize], target: isize) -> Option<(isize, isize)> {
     let mut seen = HashSet::new();
     input
         .iter()
