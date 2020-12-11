@@ -46,14 +46,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn day1_ex1() {
+    fn ex1() {
         let input = vec![ 1721, 979, 366, 299, 675, 1456 ];
         let result = solve_part1(input.as_slice());
         assert_eq!(result, 514579);
     }
 
     #[test]
-    fn day1_ex2() {
+    fn ex2() {
         let input = vec![ 1721, 979, 366, 299, 675, 1456 ];
         let result = solve_part2(input.as_slice());
         assert_eq!(result, 241861950);

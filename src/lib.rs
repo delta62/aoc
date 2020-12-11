@@ -9,5 +9,6 @@ mod d06;
 mod d07;
 mod d08;
 mod d09;
+mod d10;
 
 aoc_lib! { year = 2020 }
