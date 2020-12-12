@@ -13,20 +13,15 @@ fn solve_part1(input: &[usize]) -> usize {
     let mut data = Vec::from(input);
     data.sort_unstable();
 
-    let mut ones = 0;
-    let mut threes = 0;
-
-    data.iter().fold(0, |acc, &x| {
-        let diff = x - acc;
-
-        if diff == 1 {
-            ones += 1;
-        } else if diff == 3 {
-            threes += 1;
-        }
-
-        x
-    });
+    let (_, ones, threes) = data
+        .iter()
+        .fold((0, 0, 0), |(last, ones, threes), &x| {
+            match x - last {
+                1 => (x, ones + 1, threes    ),
+                3 => (x, ones,     threes + 1),
+                _ => (x, ones,     threes    ),
+            }
+        });
 
     ones * (threes + 1)
 }
