@@ -83,53 +83,51 @@ fn solve_part1(input: &[usize]) -> usize {
  * [ 6 7 8 11 ] -
  */
 
-// #[aoc(day10, part2)]
-// fn solve_part2(input: &[usize]) -> usize {
-//     let mut data = Vec::from(input);
-//     data.sort_unstable();
-//     vec.insert(0, 0);
-//     vec.push(data[data.len() - 1] + 3);
-//
-//     let mut singles = 0;
-//     let mut doubles = 0;
-//
-//     let end_idx = data.len() - 3;
-//     for i in 1..end_idx {
-//         let first = data[i - 1];
-//         let mut ptr = i;
-//
-//         if data[ptr + 1] <= first + 3 {
-//             solutions.push(data[ptr + 1];
-//         }
-//     }
-//
-//     2usize.pow(solutions)
-// }
+#[aoc(day10, part2)]
+fn solve_part2(input: &[usize]) -> usize {
+    let mut data = Vec::from(input);
+    data.sort_unstable();
+    data.insert(0, 0);
+    data.push(data[data.len() - 1] + 3);
+
+    let mut singles = 0;
+
+    let end_idx = data.len() - 3;
+    for i in 1..end_idx {
+        let first = data[i - 1];
+        let middle = data[i];
+        let last = data[i + 1];
+
+        if last <= first + 3 {
+            println!("single {}", middle);
+            singles += 1;
+        }
+    }
+
+    let mut doubles = 0;
+    let end_idx = data.len() - 4;
+    for i in 1..end_idx {
+        let first = data[i - 1];
+        let mid1 = data[i];
+        let mid2 = data[i + 1];
+        let last = data[i + 2];
+
+        if last <= first + 3 {
+            println!("double {}, {}", mid1, mid2);
+            doubles += 1;
+        }
+    }
+
+    2usize.pow(singles - doubles) + 2usize.pow(doubles)
+    // 2usize.pow(singles + doubles)
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn ex1() {
-        let input = r"16
-10
-15
-5
-1
-11
-7
-19
-6
-12
-4";
-        let input = parse(input);
-        let result = solve_part1(&input);
-        assert_eq!(result, 35);
-    }
-
 //     #[test]
-//     fn ex2() {
+//     fn ex1() {
 //         let input = r"16
 // 10
 // 15
@@ -142,7 +140,25 @@ mod tests {
 // 12
 // 4";
 //         let input = parse(input);
-//         let result = solve_part2(&input);
-//         assert_eq!(result, 8);
+//         let result = solve_part1(&input);
+//         assert_eq!(result, 35);
 //     }
+
+    #[test]
+    fn ex2() {
+        let input = r"16
+10
+15
+5
+1
+11
+7
+19
+6
+12
+4";
+        let input = parse(input);
+        let result = solve_part2(&input);
+        assert_eq!(result, 8);
+    }
 }
