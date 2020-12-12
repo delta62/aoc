@@ -118,8 +118,7 @@ fn solve_part2(input: &[usize]) -> usize {
         }
     }
 
-    2usize.pow(singles - doubles) + 2usize.pow(doubles)
-    // 2usize.pow(singles + doubles)
+    2usize.pow(singles - doubles)
 }
 
 #[cfg(test)]

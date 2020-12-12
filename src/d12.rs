@@ -39,11 +39,10 @@ struct Ship {
 
 impl Ship {
     fn new() -> Self {
-        Self {
-            east: 0,
-            north: 0,
-            orientation: 0,
-        }
+        let east = 0;
+        let north = 0;
+        let orientation = 0;
+        Self { east, north, orientation }
     }
 
     fn perform(&mut self, instr: &Instruction) {
@@ -76,6 +75,51 @@ impl Ship {
             _   => panic!("Can't move at angle {}", self.orientation),
         }
     }
+
+    fn move_towards(&mut self, waypoint: &Waypoint, units: isize) {
+        for _ in 0..units {
+            self.north += waypoint.north;
+            self.east += waypoint.east;
+        }
+    }
+}
+
+struct Waypoint {
+    north: isize,
+    east: isize,
+}
+
+impl Waypoint {
+    fn new(east: isize, north: isize) -> Self {
+        Self { east, north }
+    }
+
+    fn rotate_about(&mut self, degrees: isize) {
+        let mut degrees = degrees;
+        if degrees < 0 {
+            degrees += 360
+        }
+
+        let rotations = degrees / 90;
+
+        for _ in 0..rotations {
+            let n = self.north;
+            let e = self.east;
+
+            self.east = n;
+            self.north = -e;
+        }
+    }
+
+    fn translate(&mut self, instr: &Instruction) {
+        match instr {
+            Instruction::North(x) => self.north += x,
+            Instruction::South(x) => self.north -= x,
+            Instruction::East(x)  => self.east  += x,
+            Instruction::West(x)  => self.east  -= x,
+            _ => panic!("Unknown translation command"),
+        }
+    }
 }
 
 #[aoc_generator(day12)]
@@ -98,8 +142,19 @@ fn solve_part1(input: &[Instruction]) -> isize {
 }
 
 #[aoc(day12, part2)]
-fn solve_part2(input: &[Instruction]) -> usize {
-    42
+fn solve_part2(input: &[Instruction]) -> isize {
+    let mut ship = Ship::new();
+    let mut waypoint = Waypoint::new(10, 1);
+
+    for instr in input {
+        match instr {
+            Instruction::Rotate(x) => waypoint.rotate_about(*x),
+            Instruction::Forward(x) => ship.move_towards(&waypoint, *x),
+            _ => waypoint.translate(&instr),
+        }
+    }
+
+    ship.east.abs() + ship.north.abs()
 }
 
 #[cfg(test)]
@@ -121,5 +176,14 @@ F11";
 
     #[test]
     fn ex2() {
+        let input = r"F10
+N3
+F7
+R90
+F11";
+
+        let input = parse(input);
+        let result = solve_part2(&input);
+        assert_eq!(result, 286);
     }
 }
