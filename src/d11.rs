@@ -1,7 +1,6 @@
 use aoc_runner_derive::aoc;
 use std::str::FromStr;
 
-#[derive(Debug)]
 enum Direction {
     Nw,
     N,
@@ -32,7 +31,7 @@ struct Simulation {
 }
 
 impl Simulation {
-    fn step(&mut self, move_threshold: usize, distance: Option<usize>) -> SimulationResult {
+    fn step(&mut self, move_threshold: usize, distance: usize) -> SimulationResult {
         let mut changed = false;
 
         self.state = self.state
@@ -66,7 +65,7 @@ impl Simulation {
             .count()
     }
 
-    fn scan_count(&self, from: usize, distance: Option<usize>) -> usize {
+    fn scan_count(&self, from: usize, distance: usize) -> usize {
         [
             Direction::Nw, Direction::N, Direction::Ne,
             Direction::W,                Direction::E,
@@ -77,17 +76,17 @@ impl Simulation {
             .count()
     }
 
-    fn raycast(&self, from: usize, dir: &Direction, distance: Option<usize>) -> bool {
+    fn raycast(&self, from: usize, dir: &Direction, distance: usize) -> bool {
         let from = from as isize;
-        let distance = distance.unwrap_or(999) as isize;
+        let distance = distance as isize;
+
         let rows = self.rows as isize;
         let cols = self.columns as isize;
 
         let from_row = from / self.columns as isize;
         let from_col = from % self.columns as isize;
 
-        for i in 0..distance {
-            let i = i + 1;
+        for i in 1..distance + 1 {
             let (c, r) = match dir {
                 Direction::Nw => (from_col - i, from_row - i),
                 Direction::N  => (from_col,     from_row - i),
@@ -167,7 +166,7 @@ impl FromStr for Simulation {
 fn solve_part1(input: &str) -> usize {
     let mut sim = Simulation::from_str(input).unwrap();
 
-    while let SimulationResult::InProgress = sim.step(4, Some(1)) { }
+    while let SimulationResult::InProgress = sim.step(4, 1) { }
 
     sim.occupied_seats()
 }
@@ -176,7 +175,7 @@ fn solve_part1(input: &str) -> usize {
 fn solve_part2(input: &str) -> usize {
     let mut sim = Simulation::from_str(input).unwrap();
 
-    while let SimulationResult::InProgress = sim.step(5, None) { }
+    while let SimulationResult::InProgress = sim.step(5, 999) { }
 
     sim.occupied_seats()
 }
