@@ -1,6 +1,18 @@
 use aoc_runner_derive::aoc;
 use std::str::FromStr;
 
+#[derive(Debug)]
+enum Direction {
+    Nw,
+    N,
+    Ne,
+    W,
+    E,
+    Sw,
+    S,
+    Se,
+}
+
 enum SimulationResult {
     InProgress,
     Settled,
@@ -15,23 +27,24 @@ enum State {
 
 struct Simulation {
     columns: usize,
+    rows: usize,
     state: Vec<State>,
 }
 
 impl Simulation {
-    fn step(&mut self) -> SimulationResult {
+    fn step(&mut self, move_threshold: usize, distance: Option<usize>) -> SimulationResult {
         let mut changed = false;
 
         self.state = self.state
             .iter()
             .enumerate()
             .map(|(i, cell)| {
-                match (cell, self.adjacent_occupied(i)) {
+                match (cell, self.scan_count(i, distance)) {
                     (State::EmptySeat, 0) => {
                         changed = true;
                         State::FullSeat
                     }
-                    (State::FullSeat, x) if x >= 4 => {
+                    (State::FullSeat, x) if x >= move_threshold => {
                         changed = true;
                         State::EmptySeat
                     }
@@ -53,32 +66,73 @@ impl Simulation {
             .count()
     }
 
-    fn adjacent_occupied(&self, index: usize) -> usize {
-        let rows = self.state.len() / self.columns;
-        let max_row = rows - 1;
-        let max_col = self.columns - 1;
-
-        let row = index / self.columns;
-        let col = index % self.columns;
-
-        let nw = if col == 0 || row == 0             { 0 } else { self.cell_value(row - 1, col - 1) };
-        let n  = if row == 0                         { 0 } else { self.cell_value(row - 1, col    ) };
-        let ne = if col == max_col || row == 0       { 0 } else { self.cell_value(row - 1, col + 1) };
-        let w  = if col == 0                         { 0 } else { self.cell_value(row,     col - 1) };
-        let e  = if col == max_col                   { 0 } else { self.cell_value(row,     col + 1) };
-        let sw = if col == 0 || row == max_row       { 0 } else { self.cell_value(row + 1, col - 1) };
-        let s  = if row == max_row                   { 0 } else { self.cell_value(row + 1, col    ) };
-        let se = if row == max_row || col == max_col { 0 } else { self.cell_value(row + 1, col + 1) };
-
-        nw + n + ne + w + e + sw + s + se
+    fn scan_count(&self, from: usize, distance: Option<usize>) -> usize {
+        [
+            Direction::Nw, Direction::N, Direction::Ne,
+            Direction::W,                Direction::E,
+            Direction::Sw, Direction::S, Direction::Se,
+        ]
+            .iter()
+            .filter(|&dir| self.raycast(from, dir, distance))
+            .count()
     }
 
-    fn cell_value(&self, row: usize, col: usize) -> usize {
-        let idx = row * self.columns + col;
-        match self.state[idx] {
-            State::FullSeat => 1,
-            _ => 0,
+    fn raycast(&self, from: usize, dir: &Direction, distance: Option<usize>) -> bool {
+        let from = from as isize;
+        let distance = distance.unwrap_or(999) as isize;
+        let rows = self.rows as isize;
+        let cols = self.columns as isize;
+
+        let from_row = from / self.columns as isize;
+        let from_col = from % self.columns as isize;
+
+        for i in 0..distance {
+            let i = i + 1;
+            let (c, r) = match dir {
+                Direction::Nw => (from_col - i, from_row - i),
+                Direction::N  => (from_col,     from_row - i),
+                Direction::Ne => (from_col + i, from_row - i),
+                Direction::W  => (from_col - i, from_row    ),
+                Direction::E  => (from_col + i, from_row    ),
+                Direction::Sw => (from_col - i, from_row + i),
+                Direction::S  => (from_col,     from_row + i),
+                Direction::Se => (from_col + i, from_row + i),
+            };
+
+            if r < 0 || c < 0 || r >= rows || c >= cols {
+                return false;
+            }
+
+            let idx = r * cols + c;
+
+            match self.state[idx as usize] {
+                State::EmptySeat => return false,
+                State::FullSeat => return true,
+                _ => { }
+            }
         }
+
+        false
+    }
+}
+
+impl std::fmt::Display for Simulation {
+    fn fmt(&self, f:&mut std::fmt::Formatter) -> std::fmt::Result {
+        for (i, x) in self.state.iter().enumerate() {
+            if i % self.columns == 0 && i != 0 {
+                writeln!(f)?;
+            }
+
+            let c = match x {
+                State::FullSeat  => '#',
+                State::EmptySeat => 'L',
+                State::Floor     => '.',
+            };
+
+            write!(f, "{}", c)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -103,7 +157,9 @@ impl FromStr for Simulation {
                 }
             });
 
-        Ok(Self { columns, state })
+        let rows = state.len() / columns;
+
+        Ok(Self { columns, rows, state })
     }
 }
 
@@ -111,14 +167,18 @@ impl FromStr for Simulation {
 fn solve_part1(input: &str) -> usize {
     let mut sim = Simulation::from_str(input).unwrap();
 
-    while let SimulationResult::InProgress = sim.step() { }
+    while let SimulationResult::InProgress = sim.step(4, Some(1)) { }
 
     sim.occupied_seats()
 }
 
 #[aoc(day11, part2)]
-fn solve_part2(input: &str) -> isize {
-    42
+fn solve_part2(input: &str) -> usize {
+    let mut sim = Simulation::from_str(input).unwrap();
+
+    while let SimulationResult::InProgress = sim.step(5, None) { }
+
+    sim.occupied_seats()
 }
 
 #[cfg(test)]
