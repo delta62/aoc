@@ -13,7 +13,7 @@ fn solve_part1(input: &[usize]) -> usize {
     42
 }
 
-#[aoc(day12, part2)]
+#[aoc(day13, part2)]
 fn solve_part2(input: &[usize]) -> usize {
     42
 }
