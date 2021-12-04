@@ -23,6 +23,41 @@ fn solve_part1(input: &[usize]) -> usize {
     ret
 }
 
+#[aoc(day1, part2)]
+fn solve_part2(input: &[usize]) -> usize {
+    if input.len() < 4 {
+        return 0;
+    }
+
+    let window = (input[0], input[1], input[2]);
+    let seed = (window, 0);
+
+    input
+        .iter()
+        .skip(3)
+        .fold(seed, |(last, sum), &next| {
+            let (l0, l1, l2) = last;
+            let old_sum = l0 + l1 + l2;
+            let new_sum = l1 + l2 + next;
+            let next_window = (l1, l2, next);
+
+            // println!(
+            //     "{:?} [{}] <-> {:?} [{}]",
+            //     last,
+            //     old_sum,
+            //     next_window,
+            //     new_sum,
+            // );
+
+            if new_sum > old_sum {
+                (next_window, sum + 1)
+            } else {
+                (next_window, sum)
+            }
+        })
+        .1
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -71,5 +106,37 @@ mod test {
 
         let res = solve_part1(&input);
         assert_eq!(res, 7);
+    }
+
+    #[test]
+    fn solves_empty_part2() {
+        let input = vec![ ];
+        let res = solve_part2(&input);
+        assert_eq!(res, 0);
+    }
+
+    #[test]
+    fn solves_short_part2() {
+        let input = vec![ 1, 2, 3 ];
+        let res = solve_part2(&input);
+        assert_eq!(res, 0);
+    }
+
+    #[test]
+    fn solves_single_part2() {
+        let input = vec![ 1, 2, 3, 2 ];
+        let res = solve_part2(&input);
+        assert_eq!(res, 1);
+    }
+
+    #[test]
+    fn solves_example_2() {
+        let input = vec! [
+            199, 200, 208, 210, 200,
+            207, 240, 269, 260, 263,
+        ];
+
+        let res = solve_part2(&input);
+        assert_eq!(res, 5);
     }
 }
