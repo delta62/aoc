@@ -1,61 +1,75 @@
 use aoc_runner_derive::{aoc, aoc_generator};
-use std::collections::HashSet;
-
-const TARGET: isize = 2020;
 
 #[aoc_generator(day1)]
-fn part1(input: &str) -> Vec<isize> {
+fn parse(input: &str) -> Vec<usize> {
     input
         .lines()
-        .map(|x| x.parse::<isize>().unwrap())
+        .map(|line| line.parse::<usize>().unwrap())
         .collect()
 }
 
 #[aoc(day1, part1)]
-fn solve_part1(input: &[isize]) -> isize {
-    two_sum(input, TARGET)
-        .map(|(x, y)| x * y)
-        .unwrap()
-}
+fn solve_part1(input: &[usize]) -> usize {
+    let first = input.get(0).unwrap_or(&0);
+    let seed = (first, 0);
 
-#[aoc(day1, part2)]
-fn solve_part2(input: &[isize]) -> isize {
-    input
+    let (_, ret) = input
         .iter()
-        .find_map(|z| {
-            two_sum(input, TARGET - z).map(|(x, y)| x * y * z)
-        })
-        .unwrap()
-}
+        .fold(seed, |(last, sum), next| {
+            let newsum = if next > last { sum + 1 } else { sum };
+            (next, newsum)
+        });
 
-pub fn two_sum(input: &[isize], target: isize) -> Option<(isize, isize)> {
-    let mut seen = HashSet::new();
-    input
-        .iter()
-        .find_map(|x| {
-            let x = *x;
-            let wanted = target - x;
-            let ret = seen.get(&wanted).map(|_| (x, wanted));
-            seen.insert(x);
-            ret
-        })
+    ret
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
 
     #[test]
-    fn ex1() {
-        let input = vec![ 1721, 979, 366, 299, 675, 1456 ];
-        let result = solve_part1(input.as_slice());
-        assert_eq!(result, 514579);
+    fn parses_input() {
+        let input = "0\n1\n2\n";
+        let res = parse(input);
+        assert_eq!(res, vec![ 0, 1, 2 ]);
     }
 
     #[test]
-    fn ex2() {
-        let input = vec![ 1721, 979, 366, 299, 675, 1456 ];
-        let result = solve_part2(input.as_slice());
-        assert_eq!(result, 241861950);
+    fn solves_empty_list() {
+        let input = vec![ ];
+        let res = solve_part1(&input);
+        assert_eq!(res, 0);
+    }
+
+    #[test]
+    fn solves_singleton_list() {
+        let input = vec![ 42 ];
+        let res = solve_part1(&input);
+        assert_eq!(res, 0);
+    }
+
+    #[test]
+    fn solves_decreasing_list() {
+        let input = vec![ 3, 2, 1 ];
+        let res = solve_part1(&input);
+        assert_eq!(res, 0);
+    }
+
+    #[test]
+    fn solves_increasing_list() {
+        let input = vec![ 1, 2, 3 ];
+        let res = solve_part1(&input);
+        assert_eq!(res, 2);
+    }
+
+    #[test]
+    fn solves_example_1() {
+        let input = vec! [
+            199, 200, 208, 210, 200,
+            207, 240, 269, 260, 263,
+        ];
+
+        let res = solve_part1(&input);
+        assert_eq!(res, 7);
     }
 }

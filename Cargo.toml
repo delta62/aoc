@@ -1,5 +1,5 @@
 [package]
-name = "aoc2020"
+name = "aoc"
 version = "0.1.0"
 authors = ["Sam Noedel <sam.noedel@gmail.com>"]
 edition = "2018"
@@ -7,6 +7,3 @@ edition = "2018"
 [dependencies]
 aoc-runner = "0.3.0"
 aoc-runner-derive = "0.3.0"
-lazy_static = "1.4.0"
-petgraph = "0.5.1"
-regex = "1.4.2"
