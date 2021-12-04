@@ -41,14 +41,6 @@ fn solve_part2(input: &[usize]) -> usize {
             let new_sum = l1 + l2 + next;
             let next_window = (l1, l2, next);
 
-            // println!(
-            //     "{:?} [{}] <-> {:?} [{}]",
-            //     last,
-            //     old_sum,
-            //     next_window,
-            //     new_sum,
-            // );
-
             if new_sum > old_sum {
                 (next_window, sum + 1)
             } else {
