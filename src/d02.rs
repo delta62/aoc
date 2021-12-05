@@ -28,15 +28,10 @@ impl FromStr for Movement {
     }
 }
 
+#[derive(Default)]
 struct Position {
     depth: usize,
     distance: usize,
-}
-
-impl Default for Position {
-    fn default() -> Self {
-        Position { depth: 0, distance: 0 }
-    }
 }
 
 #[aoc_generator(day2)]
@@ -58,6 +53,36 @@ fn solve_part1(input: &[Movement]) -> usize {
                 Down(x) => Position { depth: depth + x, distance },
                 Forward(x) => Position { depth, distance: distance + x },
                 Up(x) => Position { depth: depth - x, distance },
+            }
+        });
+
+    depth * distance
+}
+
+#[derive(Default)]
+struct AimPosition {
+    aim: usize,
+    depth: usize,
+    distance: usize,
+}
+
+#[aoc(day2, part2)]
+fn solve_part2(input: &[Movement]) -> usize {
+    use Movement::*;
+
+    let AimPosition { depth, distance, .. } = input
+        .iter()
+        .fold(AimPosition::default(), |state, movement| {
+            match movement {
+                Up(x) => AimPosition { aim: state.aim - x, ..state },
+                Down(x) => AimPosition { aim: state.aim + x, ..state },
+                Forward(x) => {
+                    AimPosition {
+                        depth: state.depth + state.aim * x,
+                        distance: state.distance + x,
+                        ..state
+                    }
+                }
             }
         });
 
@@ -90,5 +115,19 @@ mod test {
         ];
         let res = solve_part1(&input);
         assert_eq!(res, 150);
+    }
+
+    #[test]
+    fn solves_example_2() {
+        let input = vec![
+            Movement::Forward(5),
+            Movement::Down(5),
+            Movement::Forward(8),
+            Movement::Up(3),
+            Movement::Down(8),
+            Movement::Forward(2),
+        ];
+        let res = solve_part2(&input);
+        assert_eq!(res, 900);
     }
 }
