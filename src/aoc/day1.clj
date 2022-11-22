@@ -11,11 +11,9 @@
   (= char \())
 
 (defn- count-parens [acc, x]
-  (if (is-leftparen x)
-    (+ acc 1)
-    (- acc 1)))
+  (if (is-leftparen x) (dec acc) (inc acc)))
 
-(defn- oob
+(defn- oob?
   "true when the given index is out of bounds from the collection, or false otherwise"
   [coll idx]
   (>= idx (count coll)))
@@ -26,7 +24,7 @@
 (defn part2
   ([input] (part2 input 0 0))
   ([input depth idx]
-   (if (oob input idx)
+   (if (oob? input idx)
      0
      (let [next-depth (if (is-leftparen (get input idx)) (inc depth) (dec depth))]
        (if (= next-depth -1)
