@@ -4,6 +4,7 @@
             [aoc.day2]
             [aoc.day3]
             [aoc.day4]
+            [aoc.day5]
             [aoc.runner :refer [aoc-days]]))
 
 (defn -main
@@ -11,4 +12,5 @@
   (aoc-days ['aoc.day1
              'aoc.day2
              'aoc.day3
-             'aoc.day4]))
+             'aoc.day4
+             'aoc.day5]))
