@@ -24,11 +24,7 @@
         h (nth box 2)]
     (apply + (map #(* 2 %1) (take 2 (sort [l w h]))))))
 
-(defn- box-volume [box]
-  (let [l (first box)
-        w (second box)
-        h (nth box 2)]
-    (* l w h)))
+(defn- box-volume [box] (apply * box))
 
 (defn- ribbon-needed [line]
   (let [box (parse-box line)]
