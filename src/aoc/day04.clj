@@ -1,4 +1,4 @@
-(ns aoc.day4
+(ns aoc.day04
   (:require [clojure.string :as string])
   (:import java.security.MessageDigest java.math.BigInteger))
 

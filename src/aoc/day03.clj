@@ -1,4 +1,4 @@
-(ns aoc.day3)
+(ns aoc.day03)
 
 (def ^:private x first)
 (def ^:private y second)

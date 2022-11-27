@@ -1,6 +1,6 @@
-(ns aoc.day3-test
+(ns aoc.day03-test
   (:require [clojure.test :refer [deftest is testing]]
-            [aoc.day3 :refer [part1 part2]]))
+            [aoc.day03 :refer [part1 part2]]))
 
 (deftest part1-tests
   (testing "example 1"

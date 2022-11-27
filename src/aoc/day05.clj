@@ -1,4 +1,4 @@
-(ns aoc.day5
+(ns aoc.day05
   (:require [clojure.string :as string])
   (:require [aoc.collections :refer [window]]))
 
