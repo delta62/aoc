@@ -17,8 +17,8 @@
 (defn- inclusive-range [min max] (range min (inc max)))
 
 (defn- block-range [instr]
-  (for [y (inclusive-range (get instr :min-y) (get instr :max-y))
-        x (inclusive-range (get instr :min-x) (get instr :max-x))]
+  (for [y (inclusive-range (:min-y instr) (:max-y instr))
+        x (inclusive-range (:min-x instr) (:max-x instr))]
     [x y]))
 
 (defn- toggle [state coord]
@@ -28,10 +28,35 @@
 
 (defn- run-instr [state instr]
   (let [coords (block-range instr)]
-    (case (get instr :op)
+    (case (:op instr)
       :on (into state coords)
       :off (apply disj state coords)
       (reduce toggle state coords))))
 
+(defn- inc-all
+  ([state coords] (inc-all state coords 1))
+  ([state coords n]
+   (reduce (fn [state coord] (update state coord #(max 0 (+ n %1))))
+           state
+           coords)))
+
+(defn- dec-all [state coords] (inc-all state coords -1))
+
+(defn- run-brightness [state instr]
+  (let [coords (block-range instr)]
+    (case (:op instr)
+      :on (inc-all state coords)
+      :off (dec-all state coords)
+      (inc-all state coords 2))))
+
+(defn- sum [m] (apply + (vals m)))
+
 (defn part1 [instrs]
   (count (reduce run-instr #{} instrs)))
+
+(defn part2 [instrs]
+  (let [init (reduce 
+              #(assoc %1 %2 0) 
+              {} 
+              (block-range {:min-x 0 :max-x 999 :min-y 0 :max-y 999}))]
+    (sum (reduce run-brightness init instrs))))
