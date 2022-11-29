@@ -18,6 +18,7 @@
   (let [{:keys [options errors summary]} (parse-opts args cli-options)
         day (:day options)
         year (:year options)]
+    (println "AOC" year)
     (cond
       (some? errors) (println (first errors))
       (:help options) (println summary)

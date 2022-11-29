@@ -4,7 +4,8 @@
             [clojure.string :as string]
             [clojure.edn :as edn]
             [clojure.tools.namespace.find :as nsf]
-            [clojure.java.classpath :refer [classpath]])
+            [clojure.java.classpath :refer [classpath]]
+            [clojure.term.colors :as color])
   (:import [java.io FileNotFoundException]))
 
 (defn- load-namespaces []
@@ -48,9 +49,7 @@
 (defn- load-input [day mod]
   (let [parser (ns-resolve mod 'parse)]
     (if (some? parser)
-      (do
-        (print "Parsing: ")
-        (time (parser (slurp (input-path day)))))
+      (parser (slurp (input-path day)))
       (slurp (input-path day)))))
 
 (defn- load-or-download-input [year day mod]
@@ -61,19 +60,30 @@
 (defn- latest-day [days]
   (last (sort-by day-number days)))
 
+(defn time-ms [f & args]
+  (let [start-time (. System (currentTimeMillis))
+        result (apply f args)
+        end-time (. System (currentTimeMillis))]
+    [(- end-time start-time) result]))
+
 (defn run-day [year day]
   (let [namespace (if (int? day) (load-namespace day) day)
         part1 (ns-resolve namespace 'part1)
         part2 (ns-resolve namespace 'part2)
         day-num (day-number day)
-        input (load-or-download-input year day-num namespace)]
-    (println (str "Day " day-num))
+        [input-time input] (time-ms load-or-download-input year day-num namespace)]
     (when (some? part1)
-      (print "Part 1: ")
-      (println (time (part1 input))))
+      (let [[solve-time solution] (time-ms part1 input)]
+        (println (format "Day %2d - Part 1:   " day-num) (color/green (str solution)))
+        (println (str "         generator: " (color/blue (format "%dms" input-time))))
+        (println (str "         solution:  " (color/blue (format "%dms" solve-time))))
+        (println)))
     (when (some? part2)
-      (print "Part 2: ")
-      (println (time (part2 input))))))
+      (let [[solve-time solution] (time-ms part2 input)]
+        (println (format "Day %2d - Part 2:   " day-num) (color/green (str solution)))
+        (println (str "         generator: " (color/blue (format "%dms" input-time))))
+        (println (str "         solution:  " (color/blue (format "%dms" solve-time))))
+        (println)))))
 
 (defn run-latest [year]
   (run-day year (latest-day (load-namespaces))))

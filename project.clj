@@ -5,6 +5,7 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [clj-http "3.12.3"]
+                 [clojure-term-colors "0.1.0"]
                  [org.clojure/tools.cli "1.0.214"]
                  [org.clojure/tools.namespace "1.3.0"]
                  [org.clojure/java.classpath "1.0.0"]]
