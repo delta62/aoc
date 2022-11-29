@@ -12,7 +12,7 @@ NOT x -> h
 NOT y -> i")
 
 (deftest part-1
-  (testing "no it doesnt"
+  (testing "part 1 examples"
     (let [parsed (parse input)]
       (is (= 72 (solve "d" parsed)))
       (is (= 507 (solve "e" parsed)))
