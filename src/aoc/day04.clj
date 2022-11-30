@@ -16,5 +16,6 @@
 (defn part1 [input]
   (find-idx #(starts-with-zeroes 5 %1) (map #(str input %1) (range))))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn part2 [input]
   (find-idx #(starts-with-zeroes 6 %1) (map #(str input %1) (range))))

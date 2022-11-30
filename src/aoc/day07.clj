@@ -41,3 +41,9 @@
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn part1 [instructions]
   (solve "a" instructions))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn part2 [instructions]
+  (let [new-b (solve "a" instructions)
+        state-b (assoc instructions "b" [:literal new-b])]
+    (solve "a" state-b)))
