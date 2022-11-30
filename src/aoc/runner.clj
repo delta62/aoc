@@ -39,7 +39,7 @@
       (throw (Exception. "Couldn't download input. Is your session token in .aoc-session valid?")))))
 
 (defn- input-path [day]
-  (format "resources/input/day%02d.txt" day))
+  (io/resource (format "input/day%02d.txt" day)))
 
 (defn- write-input [day input]
   (spit (input-path day) input))
