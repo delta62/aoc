@@ -1,17 +1,17 @@
 # aoc
 
-FIXME: description
+Advent of code 2022
 
-## Installation
-
-Download from http://example.com/FIXME.
+See other branches for past years!
 
 ## Usage
 
-FIXME: explanation
+Runs the latest day by default
 
-    $ java -jar aoc-0.1.0-standalone.jar [args]
+Options:
 
-## Options
-
-FIXME: listing of options this app accepts.
+```
+-d, --day DAY  Run a specific day
+-a, --all      Run all days
+-h, --help     Show help
+```
