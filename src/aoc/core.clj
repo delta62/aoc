@@ -1,7 +1,7 @@
 (ns aoc.core
   (:gen-class)
   (:require [clojure.tools.cli :refer [parse-opts]]
-            [aoc.runner :refer [run-all run-day run-latest]]))
+            [aoc-runner.core :refer [run-all run-day run-latest]]))
 
 (def cli-options
   [["-d" "--day DAY" "Run a specific day"
