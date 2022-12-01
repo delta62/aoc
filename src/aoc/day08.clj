@@ -10,11 +10,14 @@
 (defn line-value [s]
   (- (count s) (str-len s)))
 
+(defn- expanded-len [s]
+  (+ 2 (count s) (count (re-seq #"\"|\\" s))))
+
+(defn expanded-value [s]
+  (- (expanded-len s) (count s)))
+
 (defn part1 [lines]
   (reduce #(+ %1 (line-value %2)) 0 lines))
 
-(comment
-  (str-len "\\x4F")
-  (parse "\"\"\nabc")
-  (line-value (first (parse "\"\"")))
-  )
+(defn part2 [lines]
+  (reduce #(+ %1 (expanded-value %2)) 0 lines))
