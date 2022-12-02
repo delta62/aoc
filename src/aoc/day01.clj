@@ -1,8 +1,6 @@
 (ns aoc.day01
-  (:require [clojure.string :refer [split split-lines]]))
-
-(defn- sum [nums]
-  (apply + nums))
+  (:require [clojure.string :refer [split split-lines]]
+            [aoc.util :refer [sum]]))
 
 (defn parse
   "Parses a newline-separated string into nested lists of numbers"
