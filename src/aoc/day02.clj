@@ -1,6 +1,6 @@
 (ns aoc.day02
-  (:require [clojure.string :refer [lower-case split-lines]]
-            [aoc.util :refer [sum]]))
+  (:require [aoc.util :refer [sum]]
+            [clojure.string :refer [split-lines]]))
 
 (def shapes {:rock {:beats :scissors
                     :loses-to :paper
@@ -12,30 +12,30 @@
                         :loses-to :rock
                         :value 3}})
 
-(defn- parse-theirs [s]
+(defn- parse-pair [mine s]
   (case s
     "A" :rock
     "B" :paper
     "C" :scissors
-    (keyword (lower-case s))))
+    (mine s)))
 
-(defn- parse-mine [[theirs mine]]
-  [theirs (case mine
-            :x :rock
-            :y :paper
-            :z :scissors)])
+(defn- parse-mine [mine]
+  (case mine
+    "X" :rock
+    "Y" :paper
+    "Z" :scissors))
 
-(defn- parse-outcome [[theirs mine]]
-  [theirs (case mine
-            :x :loss
-            :y :tie
-            :z :win)])
+(defn- parse-outcome [mine]
+  (case mine
+    "X" :loss
+    "Y" :tie
+    "Z" :win))
 
-(defn- parse-line [line]
+(defn- parse-line [line f]
   (->> line
        (re-matches #"(.) (.)")
        (rest)
-       (map parse-theirs)))
+       (map #(parse-pair f %))))
 
 (defn- is-tie? [game]
   (apply = game))
@@ -64,17 +64,14 @@
   (let [needed-shape (find-needed game)]
     (score-game [theirs needed-shape])))
 
-(defn parse [s]
-  (map parse-line (split-lines s)))
+(defn parse-part1 [s]
+  (map #(parse-line % parse-mine) (split-lines s)))
+
+(defn parse-part2 [s]
+  (map #(parse-line % parse-outcome) (split-lines s)))
 
 (defn part1 [input]
-  (->> input
-       (map parse-mine)
-       (map score-game)
-       (sum)))
+  (sum (map score-game input)))
 
 (defn part2 [input]
-  (->> input
-       (map parse-outcome)
-       (map score-needed)
-       (sum)))
+  (sum (map score-needed input)))

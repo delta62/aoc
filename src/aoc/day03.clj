@@ -1,7 +1,7 @@
 (ns aoc.day03
-  (:require [clojure.string :refer [split-lines]]
+  (:require [aoc.util :refer [sum]]
             [clojure.set :refer [intersection]]
-            [aoc.util :refer [sum]]))
+            [clojure.string :refer [split-lines]]))
 
 (defn- compartments
   "Split a string into two sets of characters"

@@ -5,7 +5,7 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [org.clojure/tools.cli "1.0.214"]
-                 [org.clojars.delta62/aoc-runner "0.1.1"]]
+                 [org.clojars.delta62/aoc-runner "0.2.0"]]
   :main ^:skip-aot aoc.core/-main
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
