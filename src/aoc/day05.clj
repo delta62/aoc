@@ -22,8 +22,8 @@
        (vec)))
 
 (defn parse-move-line
-  "Parse a human-readable move instruction to a map with :count and 0-indexed
-   :from and :two values"
+  "Parse a human-readable move instruction to a map with `:count` and 0-indexed
+   `:from` and `:to` values"
   [line]
   (let [[count from to] (map parse-long (rest (split line #"\D+")))]
     {:count count :from (dec from) :to (dec to)}))
