@@ -41,19 +41,18 @@
     state
     (let [[item & newfrom] (nth state from)
           newfrom (or newfrom [])
-          newto (cons item (nth state to))
-          state (assoc state from newfrom)
-          state (assoc state to newto)]
-      (recur state {:count (dec count) :from from :to to}))))
+          newto (cons item (nth state to))]
+      (recur
+       (-> state (assoc from newfrom) (assoc to newto))
+       {:count (dec count) :from from :to to}))))
 
 (defn move-stack
   "Move `count` items from `from` to `to` in a single pass (order is
    maintained)"
   [state {:keys [count from to]}]
   (let [[moving newfrom] (split-at count (nth state from))
-        newto (concat moving (nth state to))
-        state (assoc state from newfrom)]
-    (assoc state to newto)))
+        newto (concat moving (nth state to))]
+    (-> state (assoc from newfrom) (assoc to newto))))
 
 (defn part1 [[init moves]]
   (join (map first (reduce move init moves))))
