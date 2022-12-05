@@ -4,3 +4,9 @@
   "Returns the sum of all numbers in a collection"
   [nums] 
   (apply + nums))
+
+(defn upper-case-ascii-char
+  "Return the given character if it's an uppercase ascii letter, else nil"
+  [c]
+  (let [char-code (int c)]
+    (if (and (>= char-code 65) (<= char-code 90)) c nil)))
