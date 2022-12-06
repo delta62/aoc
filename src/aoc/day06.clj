@@ -1,24 +1,21 @@
 (ns aoc.day06)
 
-(defn unique-sequence-index
-  "Returns a pair where the first item is the passed `index`, and the second
-   is `true` when `coll` contains at least `n` unique items, or `false`
+(defn sequence-index
+  "Returns `index` when `coll` is a sequence of `n` unique items, or false
    otherwise"
   [n index coll]
-  [(+ n index) (= n (count (set coll)))])
+  (and
+   (-> (set coll) (count) (= n))
+   index))
 
-(defn index-matches?
-  "Returns `index` if `is-match` is truthy, or `false` otherwise"
-  [[index is-match]]
-  (if is-match index false))
-
-(defn find-prefix-index
+(defn find-uniques
   "Find the first index in `coll` with `n` unique contiguous items"
   [n coll]
   (->> (partition n 1 coll)
-       (map-indexed (partial unique-sequence-index n))
-       (some index-matches?)))
+       (map-indexed (partial sequence-index n))
+       (some identity)
+       (+ n)))
 
-(defn part1 [s] (find-prefix-index 4 s))
+(defn part1 [s] (find-uniques 4 s))
 
-(defn part2 [s] (find-prefix-index 14 s))
+(defn part2 [s] (find-uniques 14 s))
