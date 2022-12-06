@@ -4,7 +4,7 @@
 (defn parse-line
   "Split a line of text into two pairs of two numbers"
   [line]
-  (->> (string/split line #"[^\d]")
+  (->> (string/split line #"\D")
        (map parse-long)
        (partition 2)))
 
