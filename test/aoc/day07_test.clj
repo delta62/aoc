@@ -30,6 +30,6 @@ $ ls
   (testing "Example 1"
     (is (= 95437 (part1 (parse sample-input))))))
 
-(deftest day7-part1-test
+(deftest day7-part2-test
   (testing "Example 1"
     (is (= 24933642 (part2 (parse sample-input))))))
