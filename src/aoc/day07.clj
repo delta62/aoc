@@ -11,8 +11,7 @@
   {:command :cd, :path path})
 
 (defn parse-ls-size
-  "Given an entry's `ls` output, return the entry's size. Gives 0 for
-   directories."
+  "Given an entry's `ls` output, return the its size. Gives 0 for directories."
   [size]
   (if (= "dir" size) 0 (parse-long size)))
 
@@ -51,21 +50,22 @@
   [path new-path]
   (case new-path
     "/" "/"
-    ".." (string/replace path #"\/[^\/]+\/[^\/]*$" "/")
+    ".." (string/replace path #"[^\/]+\/$" "")
     (str (string/join "" [path new-path]) "/")))
 
 (defn path-sequence
   "Splits a path into a sequence of components"
   [path]
   (->> (string/split path #"\/")
-       (rest)
-       (cons "/")))
+       (rest)))
 
 (defn update-tree
   "Return a new tree with the item deeply nested at `path` replaced with
    `value`"
   [tree path value]
-  (update-in tree (path-sequence path) (constantly value)))
+  (if (= "/" path)
+    (into tree value)
+    (update-in tree (path-sequence path) (constantly value))))
 
 (defn add-to-tree
   "Returns a new `[path, tree]` pair with the path reflecting any cwd changes,
@@ -105,7 +105,7 @@
   "Converts a series of command objects into a tree data structure, and adds a
    `:size` field to each directory with its cumulative size"
   [commands]
-  (->> (reduce add-to-tree ["/" {}] commands)
+  (->> (reduce add-to-tree ["" {}] commands)
        (last)
        (tree-size)))
 
