@@ -9,7 +9,7 @@
     "R" :right))
 
 (defn parse-line [line]
-  (let [[direction magnitude](string/split line #" ")
+  (let [[direction magnitude] (string/split line #" ")
         direction (parse-direction direction)
         magnitude (parse-long magnitude)]
     (repeat magnitude direction)))
