@@ -1,5 +1,6 @@
 (ns aoc.day09
-  (:require [clojure.string :as string]))
+  (:require [aoc.util :refer [diff]]
+            [clojure.string :as string]))
 
 (defn parse-direction [s]
   (case s
@@ -37,10 +38,10 @@
     (> head-y tail-y) [tail-x (inc tail-y)]))
 
 (defn move-tail [[head-x head-y :as head] [tail-x tail-y :as tail]]
-  (let [dx (abs (- head-x tail-x))
-        dy (abs (- head-y tail-y))
+  (let [dx (diff head-x tail-x)
+        dy (diff head-y tail-y)
         must-move? (or (> dx 1) (> dy 1))
-        move-diagonal? (and (not (zero? dx)) (not (zero? dy)))]
+        move-diagonal? (and (pos? dx) (pos? dy))]
     (cond
       (not must-move?) tail
       move-diagonal? (move-tail-diagonally head tail)

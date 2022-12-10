@@ -10,3 +10,7 @@
   [c]
   (let [char-code (int c)]
     (if (and (>= char-code 65) (<= char-code 90)) c nil)))
+
+(def diff
+  "Gives the difference between the two numbers as an absolute value"
+  (comp abs -))
