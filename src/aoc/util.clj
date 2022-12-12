@@ -5,6 +5,11 @@
   [nums] 
   (apply + nums))
 
+(defn product
+  "Returns the product of all numbers in a collection"
+  [nums]
+  (apply *' nums))
+
 (defn upper-case-ascii-char
   "Return the given character if it's an uppercase ascii letter, else nil"
   [c]
