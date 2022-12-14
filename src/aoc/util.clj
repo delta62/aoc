@@ -16,6 +16,12 @@
   (let [char-code (int c)]
     (if (and (>= char-code 65) (<= char-code 90)) c nil)))
 
+(defn ascii-digit?
+  "Returns true when `c` is an ascii digit, or false otherwise"
+  [c]
+  (let [i (int c)]
+    (and (>= i 48) (< i 58))))
+
 (defn lowercase-ascii-to-decimal [c]
   (- (int c) 97))
 
