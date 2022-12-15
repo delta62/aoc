@@ -1,4 +1,4 @@
-(ns aoc.day14 
+(ns aoc.day14
   (:require [clojure.string :as string]))
 
 (def sand-origin [500 0])
@@ -27,10 +27,11 @@
   (let [space (reduce draw-line {} (string/split-lines s))
         lowest-point (apply max (map last (keys space)))]
     {:space space
-     :lowest-point lowest-point}))
+     :lowest-point lowest-point
+     :floor (+ 2 lowest-point)}))
 
-(defn available? [space coord]
-  (not (contains? space coord)))
+(defn available? [space floor [_x y :as coord]]
+  (and (< y floor) (not (contains? space coord))))
 
 (defn below [[x y]]
   [x (inc y)])
@@ -41,32 +42,43 @@
 (defn below-right [[x y]]
   [(inc x) (inc y)])
 
+(defn past-lowest-point? [_space [_x y] lowest-point]
+  (>= y lowest-point))
+
+(defn sand-origin-blocked? [space _coord _lowest-point]
+  (contains? space sand-origin))
+
 (defn add-sand [state coord]
   (update state :space #(assoc % coord :sand)))
 
 (defn drop-sand
-  ([state] (drop-sand state sand-origin))
-  ([{:keys [space lowest-point] :as state} [_ y :as coord]]
-    (let [down (below coord)
-          down-left (below-left coord)
-          down-right (below-right coord)]
-      (cond
-        (>= y lowest-point) state
-        (available? space down) (recur state down)
-        (available? space down-left) (recur state down-left)
-        (available? space down-right) (recur state down-right)
-        :else (add-sand state coord))))
-  )
+  ([state f] (drop-sand state f sand-origin))
+  ([{:keys [floor lowest-point space] :as state} f coord]
+   (let [down (below coord)
+         down-left (below-left coord)
+         down-right (below-right coord)
+         avail? (partial available? space floor)]
+     (cond
+       (f space coord lowest-point) state
+       (avail? down) (recur state f down)
+       (avail? down-left) (recur state f down-left)
+       (avail? down-right) (recur state f down-right)
+       :else (add-sand state coord)))))
 
-(defn part1 [input]
+(defn sand-until [f input]
   (->> (repeat nil)
        (reduce
         (fn [state _]
-          (let [new-state (drop-sand state)]
+          (let [new-state (drop-sand state f)]
             (if (identical? state new-state) (reduced state) new-state)))
         input)
        (:space)
        (vals)
        (filter #{:sand})
        (count)))
-  
+
+(defn part1 [input]
+  (sand-until past-lowest-point? input))
+
+(defn part2 [input]
+  (sand-until sand-origin-blocked? input))
