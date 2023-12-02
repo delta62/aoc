@@ -1,12 +1,29 @@
+use crate::{input::Lines, runner::Day};
 use lazy_static::lazy_static;
 use regex::Regex;
 
-pub fn part1(input: &str) -> u32 {
-    input.lines().map(line_sum).sum()
-}
+#[derive(Default)]
+pub struct Day01;
 
-pub fn part2(input: &str) -> u32 {
-    input.lines().map(spelling_sum).sum()
+impl<'a> Day<'a> for Day01 {
+    type Input = Lines<'a>;
+    type Result = u32;
+
+    fn year() -> usize {
+        2023
+    }
+
+    fn day() -> usize {
+        1
+    }
+
+    fn part1(&mut self, input: Self::Input) -> Self::Result {
+        input.iter().map(line_sum).sum()
+    }
+
+    fn part2(&mut self, input: Self::Input) -> Self::Result {
+        input.iter().map(spelling_sum).sum()
+    }
 }
 
 fn line_sum(line: &str) -> u32 {
@@ -66,6 +83,7 @@ fn parse_backward_digit(capture: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::runner::{run_part1, run_part2};
 
     #[test]
     fn example_1_works() {
@@ -73,7 +91,7 @@ mod tests {
 pqr3stu8vwx
 a1b2c3d4e5f
 treb7uchet";
-        let result = part1(input);
+        let result = run_part1::<Day01>(&input).unwrap();
         assert_eq!(result, 142);
     }
 
@@ -86,14 +104,14 @@ xtwone3four
 4nineeightseven2
 zoneight234
 7pqrstsixteen";
-        let result = part2(input);
+        let result = run_part2::<Day01>(&input).unwrap();
         assert_eq!(result, 281);
     }
 
     #[test]
     fn part2_overlap() {
         let input = "2oneight";
-        let result = part2(input);
+        let result = run_part2::<Day01>(&input).unwrap();
         assert_eq!(result, 28);
     }
 }
