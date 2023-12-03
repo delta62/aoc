@@ -15,10 +15,28 @@ dependencies = [
 name = "aoc"
 version = "0.1.0"
 dependencies = [
+ "aoc_macros",
+ "aoc_runner",
  "lazy_static",
  "num-traits",
  "regex",
- "runner",
+]
+
+[[package]]
+name = "aoc_macros"
+version = "0.1.0"
+dependencies = [
+ "aoc_runner",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "aoc_runner"
+version = "0.1.0"
+dependencies = [
+ "inventory",
 ]
 
 [[package]]
@@ -26,6 +44,12 @@ name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
+
+[[package]]
+name = "inventory"
+version = "0.3.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0508c56cfe9bfd5dfeb0c22ab9a6abfda2f27bdca422132e494266351ed8d83c"
 
 [[package]]
 name = "lazy_static"
@@ -94,14 +118,6 @@ name = "regex-syntax"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
-
-[[package]]
-name = "runner"
-version = "0.1.0"
-dependencies = [
- "quote",
- "syn",
-]
 
 [[package]]
 name = "syn"

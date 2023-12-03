@@ -1,5 +1,4 @@
-use crate::error::{PuzzleError, Result};
-use crate::solution::PuzzleInput;
+use aoc_runner::{PuzzleError, Result, PuzzleInput};
 
 pub struct Lines<'a>(&'a str);
 

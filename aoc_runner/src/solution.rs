@@ -42,13 +42,19 @@ pub trait PuzzleInput<'a>: Sized {
     fn parse(input: &'a [u8]) -> Result<Self>;
 }
 
-impl<'a, T> PuzzleInput<'a> for T
+impl<'a> PuzzleInput<'a> for &'a str {
+    fn parse(input: &'a [u8]) -> Result<Self> {
+        std::str::from_utf8(input).map_err(|_| PuzzleError::Fail)
+    }
+}
+
+impl<'a, T> PuzzleInput<'a> for Vec<T>
 where
-    T: FromStr<Err = PuzzleError>,
+    T: PuzzleInput<'a>,
 {
     fn parse(input: &'a [u8]) -> Result<Self> {
-        let s = std::str::from_utf8(input).map_err(|_| PuzzleError::Fail)?;
-        T::from_str(s)
+        input.split(|x| *x == b'\n')
+        .map(|line| T::parse(line)).try_collect().map_err(|_| PuzzleError::Fail)
     }
 }
 

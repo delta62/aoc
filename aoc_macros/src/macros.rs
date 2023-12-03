@@ -1,67 +1,18 @@
+use crate::args::Arg;
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::{format_ident, quote};
 use syn::{
     parse::{Parse, ParseStream},
     parse_macro_input,
     punctuated::Punctuated,
-    FnArg, Ident, ItemFn, LitInt, Result, ReturnType, Token, Type,
+    FnArg, GenericParam, Generics, Ident, ImplItemType, ItemFn, Lifetime, LifetimeParam, LitInt,
+    PatType, Result, ReturnType, Token, Type, TypePath,
 };
-
-mod kw {
-    syn::custom_keyword!(year);
-    syn::custom_keyword!(day);
-    syn::custom_keyword!(part);
-}
-
-enum Arg {
-    Year {
-        year_token: kw::year,
-        eq_token: Token![=],
-        value: LitInt,
-    },
-    Day {
-        day_token: kw::day,
-        eq_token: Token![=],
-        value: LitInt,
-    },
-    Part {
-        part_token: kw::part,
-        eq_token: Token![=],
-        value: LitInt,
-    },
-}
-
-impl Parse for Arg {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let lookahead = input.lookahead1();
-
-        if lookahead.peek(kw::year) {
-            Ok(Self::Year {
-                year_token: input.parse::<kw::year>()?,
-                eq_token: input.parse()?,
-                value: input.parse()?,
-            })
-        } else if lookahead.peek(kw::day) {
-            Ok(Self::Day {
-                day_token: input.parse::<kw::day>()?,
-                eq_token: input.parse()?,
-                value: input.parse()?,
-            })
-        } else if lookahead.peek(kw::part) {
-            Ok(Self::Part {
-                part_token: input.parse::<kw::part>()?,
-                eq_token: input.parse()?,
-                value: input.parse()?,
-            })
-        } else {
-            Err(lookahead.error())
-        }
-    }
-}
 
 struct SolutionFunction {
     ident: Ident,
-    input_type: Box<Type>,
+    input_pat: PatType,
     output_type: Box<Type>,
 }
 
@@ -77,17 +28,14 @@ impl Parse for SolutionFunction {
         };
 
         let input_arg = f.sig.inputs.into_iter().next().unwrap();
-        let input_type = match input_arg {
-            FnArg::Typed(t) => match *t.ty {
-                Type::Reference(r) => r.elem,
-                _ => t.ty,
-            },
+        let input_pat = match input_arg {
+            FnArg::Typed(t) => t,
             _ => todo!(),
         };
 
         Ok(Self {
             ident,
-            input_type,
+            input_pat,
             output_type,
         })
     }
@@ -123,7 +71,6 @@ impl Parse for PuzzleAnswer {
     }
 }
 
-#[proc_macro_attribute]
 pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
     let answer = parse_macro_input!(attr as PuzzleAnswer);
 
@@ -140,12 +87,51 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
     let day = answer.day;
     let part = answer.part;
     let fn_name = f.ident;
-    let input = f.input_type;
     let output = f.output_type;
 
+    let lifetime = LifetimeParam::new(Lifetime::new("'a", Span::call_site()));
+    let lifetime = GenericParam::Lifetime(lifetime);
+    let mut input_generics = Generics::default();
+    input_generics.params.push(lifetime);
+
+    let sometype = *f.input_pat.ty;
+
+    // let foo = match sometype.clone() {
+    //     Type::Array(_) => "array",
+    //     Type::BareFn(_) => "barefn",
+    //     Type::Group(_) => "group",
+    //     Type::ImplTrait(_) => "impltrait",
+    //     Type::Infer(_) => "infer",
+    //     Type::Macro(_) => "macro",
+    //     Type::Never(_) => "never",
+    //     Type::Paren(_) => "paren",
+    //     Type::Path(_) => "path",
+    //     Type::Ptr(_) => "ptr",
+    //     Type::Reference(_) => "reference",
+    //     Type::Slice(_) => "slice",
+    //     Type::TraitObject(_) => "traitobj",
+    //     Type::Tuple(_) => "tuple",
+    //     Type::Verbatim(_) => "verbatim",
+    //     x => "wtf",
+    // };
+
+    // dbg!(foo);
+
+    let input = ImplItemType {
+        attrs: vec![],
+        vis: syn::Visibility::Inherited,
+        defaultness: None,
+        type_token: Default::default(),
+        ident: format_ident!("Input"),
+        generics: input_generics,
+        eq_token: Default::default(),
+        ty: sometype,
+        semi_token: Default::default(),
+    };
+
     let solution_impl = quote! {
-        impl crate::solution::PuzzleSolution for #struct_name {
-            type Input<'a> = #input<'a>;
+        impl aoc_runner::PuzzleSolution for #struct_name {
+            #input
             type Output = #output;
 
             fn day(&self) -> u8 {
@@ -156,11 +142,13 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
                 #part
             }
 
-            fn solve(&self, input: &Self::Input<'_>) -> Self::Output {
-                #fn_name(&input)
+            fn solve(&self, input: Self::Input<'_>) -> Self::Output {
+                #fn_name(input)
             }
         }
     };
+
+    // println!("{}", solution_impl.to_string());
 
     let expanded = quote! {
         #solution_struct

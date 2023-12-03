@@ -1,16 +1,16 @@
+use aoc_macros::aoc;
 use crate::input::Lines;
 use lazy_static::lazy_static;
 use regex::Regex;
-use runner::aoc;
 use std::convert::Infallible;
 
 #[aoc(year = 2023, day = 1, part = 1)]
-pub fn part1(input: &Lines) -> u32 {
+fn part1<'a>(input: Lines<'a>) -> u32 {
     input.iter().map(line_sum).sum()
 }
 
 #[aoc(year = 2023, day = 1, part = 2)]
-pub fn part2(input: &Lines) -> Result<u32, Infallible> {
+fn part2<'a>(input: Lines<'a>) -> Result<u32, Infallible> {
     Ok(input.iter().map(spelling_sum).sum())
 }
 
@@ -68,38 +68,37 @@ fn parse_backward_digit(capture: &str) -> u32 {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use crate::runner::{run_part1, run_part2};
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn example_1_works() {
-//         let input = "1abc2
-// pqr3stu8vwx
-// a1b2c3d4e5f
-// treb7uchet";
-//         let result = run_part1::<Day01>(&input).unwrap();
-//         assert_eq!(result, 142);
-//     }
+    #[test]
+    fn example_1_works() {
+        let input = "1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet";
+        let result = part1(&input).unwrap();
+        assert_eq!(result, 142);
+    }
 
-//     #[test]
-//     fn example_2_works() {
-//         let input = "two1nine
-// eightwothree
-// abcone2threexyz
-// xtwone3four
-// 4nineeightseven2
-// zoneight234
-// 7pqrstsixteen";
-//         let result = run_part2::<Day01>(&input).unwrap();
-//         assert_eq!(result, 281);
-//     }
+    #[test]
+    fn example_2_works() {
+        let input = "two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen";
+        let result = part2(&input).unwrap();
+        assert_eq!(result, 281);
+    }
 
-//     #[test]
-//     fn part2_overlap() {
-//         let input = "2oneight";
-//         let result = run_part2::<Day01>(&input).unwrap();
-//         assert_eq!(result, 28);
-//     }
-// }
+    #[test]
+    fn part2_overlap() {
+        let input = "2oneight";
+        let result = part2(&input).unwrap();
+        assert_eq!(result, 28);
+    }
+}

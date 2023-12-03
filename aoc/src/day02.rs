@@ -1,8 +1,9 @@
+use aoc_macros::aoc;
+use aoc_runner::PuzzleInput;
 use crate::input::Lines;
-use runner::aoc;
 
 #[aoc(year = 2023, day = 2, part = 1)]
-fn part1(input: &Lines) -> usize {
+fn part1(input: Vec<Game>) -> usize {
     let config = Sample {
         red: 12,
         green: 13,
@@ -10,15 +11,14 @@ fn part1(input: &Lines) -> usize {
     };
 
     input
-        .iter()
-        .map(|line| Game::parse(line))
+        .into_iter()
         .filter(|game| game.is_configuration_possible(&config))
         .map(|game| game.id)
         .sum()
 }
 
 #[aoc(year = 2023, day = 2, part = 2)]
-fn part2(input: &Lines) -> usize {
+fn part2<'a>(input: Lines<'a>) -> usize {
     input
         .iter()
         .map(|line| Game::parse(line))
@@ -26,8 +26,24 @@ fn part2(input: &Lines) -> usize {
         .sum()
 }
 
+impl<'a> PuzzleInput<'a> for Game {
+    fn parse(input: &'a [u8]) -> aoc_runner::Result<Self> {
+        let input = <&str as PuzzleInput>::parse(input)?;
+        let (game_id, samples) = input.split_once(':').unwrap();
+        let game_id = game_id.strip_prefix("Game ").unwrap();
+        let id = usize::from_str_radix(game_id, 10).unwrap();
+
+        let samples = samples
+            .split(';')
+            .map(|s| Sample::parse(s.trim()))
+            .collect();
+
+        Ok(Self { id, samples })
+    }
+}
+
 #[derive(Debug)]
-struct Game {
+pub struct Game {
     id: usize,
     samples: Vec<Sample>,
 }
