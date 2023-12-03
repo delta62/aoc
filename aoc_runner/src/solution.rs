@@ -2,6 +2,8 @@ use crate::error::{PuzzleError, Result};
 use std::{fmt::Display, str::FromStr};
 
 pub trait UniversalSolution {
+    fn year(&self) -> u16;
+
     fn day(&self) -> u8;
 
     fn part(&self) -> u8;
@@ -13,6 +15,10 @@ impl<T> UniversalSolution for T
 where
     T: PuzzleSolution,
 {
+    fn year(&self) -> u16 {
+        self.year()
+    }
+
     fn day(&self) -> u8 {
         self.day()
     }
@@ -30,6 +36,8 @@ where
 pub trait PuzzleSolution {
     type Input<'a>: PuzzleInput<'a>;
     type Output: SolutionOutput;
+
+    fn year(&self) -> u16;
 
     fn day(&self) -> u8;
 

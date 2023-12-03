@@ -1,6 +1,5 @@
 use aoc_macros::aoc;
 use aoc_runner::PuzzleInput;
-use crate::input::Lines;
 
 #[aoc(year = 2023, day = 2, part = 1)]
 fn part1(input: Vec<Game>) -> usize {
@@ -18,12 +17,8 @@ fn part1(input: Vec<Game>) -> usize {
 }
 
 #[aoc(year = 2023, day = 2, part = 2)]
-fn part2<'a>(input: Lines<'a>) -> usize {
-    input
-        .iter()
-        .map(|line| Game::parse(line))
-        .map(|game| game.min_power())
-        .sum()
+fn part2(input: Vec<Game>) -> usize {
+    input.into_iter().map(|game| game.min_power()).sum()
 }
 
 impl<'a> PuzzleInput<'a> for Game {
@@ -49,19 +44,6 @@ pub struct Game {
 }
 
 impl Game {
-    fn parse(input: &str) -> Self {
-        let (game_id, samples) = input.split_once(':').unwrap();
-        let game_id = game_id.strip_prefix("Game ").unwrap();
-        let id = usize::from_str_radix(game_id, 10).unwrap();
-
-        let samples = samples
-            .split(';')
-            .map(|s| Sample::parse(s.trim()))
-            .collect();
-
-        Self { id, samples }
-    }
-
     fn min_power(&self) -> usize {
         self.samples
             .iter()
@@ -149,8 +131,8 @@ Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
 Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
 Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
 Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
-        let input = Lines::new(input);
-        let solution = part1(&input);
+        let input = <Vec<Game>>::parse(input.as_bytes()).unwrap();
+        let solution = part1(input);
         assert_eq!(solution, 8);
     }
 
@@ -161,8 +143,8 @@ Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
 Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
 Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
 Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
-        let input = Lines::new(input);
-        let solution = part2(&input);
+        let input = <Vec<Game>>::parse(input.as_bytes()).unwrap();
+        let solution = part2(input);
         assert_eq!(solution, 2286);
     }
 }

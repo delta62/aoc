@@ -1,5 +1,5 @@
-use aoc_macros::aoc;
 use crate::input::Lines;
+use aoc_macros::aoc;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::convert::Infallible;
@@ -78,7 +78,8 @@ mod tests {
 pqr3stu8vwx
 a1b2c3d4e5f
 treb7uchet";
-        let result = part1(&input).unwrap();
+        let input = Lines::new(input);
+        let result = part1(input);
         assert_eq!(result, 142);
     }
 
@@ -91,14 +92,16 @@ xtwone3four
 4nineeightseven2
 zoneight234
 7pqrstsixteen";
-        let result = part2(&input).unwrap();
+        let input = Lines::new(input);
+        let result = part2(input).unwrap();
         assert_eq!(result, 281);
     }
 
     #[test]
     fn part2_overlap() {
         let input = "2oneight";
-        let result = part2(&input).unwrap();
+        let input = Lines::new(input);
+        let result = part2(input).unwrap();
         assert_eq!(result, 28);
     }
 }

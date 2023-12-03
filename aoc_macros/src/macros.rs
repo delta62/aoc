@@ -6,8 +6,8 @@ use syn::{
     parse::{Parse, ParseStream},
     parse_macro_input,
     punctuated::Punctuated,
-    FnArg, GenericParam, Generics, Ident, ImplItemType, ItemFn, Lifetime, LifetimeParam, LitInt,
-    PatType, Result, ReturnType, Token, Type, TypePath,
+    FnArg, GenericParam, Generics, Ident, ImplItemType, ItemFn, Lifetime, LifetimeParam, PatType,
+    Result, ReturnType, Token, Type,
 };
 
 struct SolutionFunction {
@@ -86,6 +86,7 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
 
     let day = answer.day;
     let part = answer.part;
+    let year = answer.year;
     let fn_name = f.ident;
     let output = f.output_type;
 
@@ -134,6 +135,10 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
             #input
             type Output = #output;
 
+            fn year(&self) -> u16 {
+                #year
+            }
+
             fn day(&self) -> u8 {
                 #day
             }
@@ -147,8 +152,6 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
             }
         }
     };
-
-    // println!("{}", solution_impl.to_string());
 
     let expanded = quote! {
         #solution_struct
