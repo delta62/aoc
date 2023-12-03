@@ -1,5 +1,5 @@
 use crate::error::{PuzzleError, Result};
-use std::{fmt::Display, str::FromStr};
+use std::fmt::Display;
 
 pub trait UniversalSolution {
     fn year(&self) -> u16;
@@ -61,8 +61,11 @@ where
     T: PuzzleInput<'a>,
 {
     fn parse(input: &'a [u8]) -> Result<Self> {
-        input.split(|x| *x == b'\n')
-        .map(|line| T::parse(line)).try_collect().map_err(|_| PuzzleError::Fail)
+        input
+            .split(|x| *x == b'\n')
+            .map(|line| T::parse(line))
+            .try_collect()
+            .map_err(|_| PuzzleError::Fail)
     }
 }
 

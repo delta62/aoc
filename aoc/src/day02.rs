@@ -26,7 +26,7 @@ impl<'a> PuzzleInput<'a> for Game {
         let input = <&str as PuzzleInput>::parse(input)?;
         let (game_id, samples) = input.split_once(':').unwrap();
         let game_id = game_id.strip_prefix("Game ").unwrap();
-        let id = usize::from_str_radix(game_id, 10).unwrap();
+        let id = game_id.parse::<usize>().unwrap();
 
         let samples = samples
             .split(';')

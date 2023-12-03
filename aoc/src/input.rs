@@ -1,4 +1,4 @@
-use aoc_runner::{PuzzleError, Result, PuzzleInput};
+use aoc_runner::{PuzzleError, PuzzleInput, Result};
 
 pub struct Lines<'a>(&'a str);
 
@@ -8,7 +8,7 @@ impl<'a> Lines<'a> {
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &'a str> {
-        self.0.lines().into_iter()
+        self.0.lines()
     }
 }
 
