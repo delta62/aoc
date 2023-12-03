@@ -5,7 +5,7 @@ mod input;
 mod solution;
 
 use day01::{Day1Part1Solution, Day1Part2Solution};
-use day02::Day2Part1Solution;
+use day02::{Day2Part1Solution, Day2Part2Solution};
 use solution::UniversalSolution;
 use std::fs;
 
@@ -14,6 +14,7 @@ pub fn main() {
         Box::new(Day1Part1Solution::default()),
         Box::new(Day1Part2Solution::default()),
         Box::new(Day2Part1Solution::default()),
+        Box::new(Day2Part2Solution::default()),
     ];
 
     for solution in solutions.iter() {
