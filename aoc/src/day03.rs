@@ -7,6 +7,14 @@ fn part1(input: Grid) -> usize {
     input.adjacenct_to_sym().sum()
 }
 
+#[aoc(year = 2023, day = 3, part = 2)]
+fn part2(input: Grid) -> usize {
+    input
+        .gears()
+        .filter_map(|gear| input.tension(gear.x, gear.y))
+        .sum()
+}
+
 #[derive(Debug)]
 struct Number {
     value: usize,
@@ -24,8 +32,9 @@ impl Number {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 struct Symbol {
+    value: char,
     x: usize,
     y: usize,
 }
@@ -37,6 +46,20 @@ pub struct Grid {
 }
 
 impl Grid {
+    fn gears<'a>(&'a self) -> impl Iterator<Item = Symbol> + 'a {
+        self.symbols.iter().filter(|s| s.value == '*').copied()
+    }
+
+    fn tension(&self, x: usize, y: usize) -> Option<usize> {
+        let adjacent: Vec<_> = self.numbers.iter().filter(|n| n.overlaps(x, y)).collect();
+
+        if adjacent.len() == 2 {
+            Some(adjacent.into_iter().map(|n| n.value).product())
+        } else {
+            None
+        }
+    }
+
     fn adjacenct_to_sym<'a>(&'a self) -> impl Iterator<Item = usize> + 'a {
         self.numbers
             .iter()
@@ -66,7 +89,8 @@ impl<'a> PuzzleInput<'a> for Grid {
 
                 if let Some(sym) = &cap.name("sym") {
                     let x = sym.start();
-                    symbols.push(Symbol { x, y });
+                    let value = sym.as_str().chars().next().unwrap();
+                    symbols.push(Symbol { value, x, y });
                 }
             }
         }
@@ -94,5 +118,22 @@ mod tests {
         let input = Grid::parse(input.as_bytes()).unwrap();
         let result = part1(input);
         assert_eq!(result, 4361);
+    }
+
+    #[test]
+    fn example2() {
+        let input = "467..114..
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..";
+        let input = Grid::parse(input.as_bytes()).unwrap();
+        let result = part2(input);
+        assert_eq!(result, 467835);
     }
 }
