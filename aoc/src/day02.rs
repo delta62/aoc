@@ -21,6 +21,12 @@ fn part2(input: Vec<Game>) -> usize {
     input.into_iter().map(|game| game.min_power()).sum()
 }
 
+#[derive(Debug)]
+pub struct Game {
+    id: usize,
+    samples: Vec<Sample>,
+}
+
 impl<'a> PuzzleInput<'a> for Game {
     fn parse(input: &'a [u8]) -> aoc_runner::Result<Self> {
         let input = <&str as PuzzleInput>::parse(input)?;
@@ -35,12 +41,6 @@ impl<'a> PuzzleInput<'a> for Game {
 
         Ok(Self { id, samples })
     }
-}
-
-#[derive(Debug)]
-pub struct Game {
-    id: usize,
-    samples: Vec<Sample>,
 }
 
 impl Game {

@@ -153,9 +153,16 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
         }
     };
 
+    let solution_collection_struct = quote! {
+        ::aoc_runner::inventory::submit! {
+            &#struct_name as &(dyn ::aoc_runner::UniversalSolution + Sync + 'static)
+        }
+    };
+
     let expanded = quote! {
         #solution_struct
         #solution_impl
+        #solution_collection_struct
     };
 
     item.extend(TokenStream::from(expanded));

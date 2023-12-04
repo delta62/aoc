@@ -11,6 +11,8 @@ pub trait UniversalSolution {
     fn solve(&self, input: &[u8]) -> Result<String>;
 }
 
+inventory::collect!(&'static (dyn UniversalSolution + Sync));
+
 impl<T> UniversalSolution for T
 where
     T: PuzzleSolution,
@@ -61,8 +63,14 @@ where
     T: PuzzleInput<'a>,
 {
     fn parse(input: &'a [u8]) -> Result<Self> {
-        input
-            .split(|x| *x == b'\n')
+        let mut lines: Vec<_> = input.split(|x| *x == b'\n').collect();
+
+        if let Some(&[]) = lines.last() {
+            lines.pop(); // Empty line at end of file
+        }
+
+        lines
+            .into_iter()
             .map(|line| T::parse(line))
             .try_collect()
             .map_err(|_| PuzzleError::Fail)
