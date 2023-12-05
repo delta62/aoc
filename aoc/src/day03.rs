@@ -49,7 +49,7 @@ pub struct Grid {
 }
 
 impl Grid {
-    fn gears<'a>(&'a self) -> impl Iterator<Item = Symbol> + 'a {
+    fn gears(&self) -> impl Iterator<Item = Symbol> + '_ {
         self.symbols.iter().filter(|s| s.value == '*').copied()
     }
 
@@ -63,7 +63,7 @@ impl Grid {
         }
     }
 
-    fn adjacenct_to_sym<'a>(&'a self) -> impl Iterator<Item = usize> + 'a {
+    fn adjacenct_to_sym(&self) -> impl Iterator<Item = usize> + '_ {
         self.numbers
             .iter()
             .filter(|n| self.symbols.iter().any(|s| n.overlaps(s.x, s.y)))

@@ -3,12 +3,12 @@ use aoc_runner::{parse_error, PuzzleInput, Result};
 use std::collections::HashSet;
 
 #[aoc(year = 2023, day = 4, part = 1)]
-fn part1<'a>(input: Vec<Ticket>) -> usize {
+fn part1(input: Vec<Ticket>) -> usize {
     input.into_iter().map(|ticket| ticket.score()).sum()
 }
 
 #[aoc(year = 2023, day = 4, part = 2)]
-fn part2<'a>(input: TicketStack) -> usize {
+fn part2(input: TicketStack) -> usize {
     input.ticket_count()
 }
 

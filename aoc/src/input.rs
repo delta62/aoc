@@ -24,7 +24,7 @@ macro_rules! numbers {
     ($expr:expr => $type:ty) => {
         $expr
             .split_whitespace()
-            .map(|x| <$type>::from_str_radix(x, 10))
+            .map(|x| x.parse::<$type>())
             .try_collect()
             .map_err(|_| ::aoc_runner::parse_error("Unable to parse whitespace-separated integers"))
     };
@@ -32,7 +32,7 @@ macro_rules! numbers {
     ($expr:expr => $type:ty; $sep:literal) => {
         $expr
             .split($sep)
-            .map(|x| <$type>::from_str_radix(x, 10))
+            .map(|x| x.parse::<$type>())
             .try_collect()
             .map_err(|_| ::aoc_runner::parse_error("Unable to parse separated integers"))
     };

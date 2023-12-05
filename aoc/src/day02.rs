@@ -109,7 +109,8 @@ impl FromStr for Sample {
                 let (quantity, color) = s
                     .split_once(' ')
                     .ok_or(parse_error("no space separating quantity from color"))?;
-                let quantity = usize::from_str_radix(quantity, 10)
+                let quantity = quantity
+                    .parse::<usize>()
                     .map_err(|_| parse_error("quantity was not an integer"))?;
 
                 match color {
