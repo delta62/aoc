@@ -44,7 +44,7 @@ impl DefaultReporter {
             }
             Err(err) => {
                 println!("    part {part}: error");
-                println!("    {err}");
+                println!("      {err}");
             }
         }
     }
