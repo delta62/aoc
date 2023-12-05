@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-inventory = "^0.3.13"
-itertools = "0.12.0"
-reqwest = { version = "0.11.22", features = ["blocking"] }
+aoc_runner_core = { path = "../aoc_runner_core" }
+aoc_runner_macros = { path = "../aoc_runner_macros" }
+itertools = "^0.12.0"
+reqwest = { version = "^0.11.22", features = ["blocking"] }

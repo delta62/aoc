@@ -1,5 +1,5 @@
 use crate::input::Lines;
-use aoc_macros::aoc;
+use aoc_runner::aoc;
 use lazy_static::lazy_static;
 use regex::Regex;
 

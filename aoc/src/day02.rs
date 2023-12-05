@@ -1,5 +1,4 @@
-use aoc_macros::aoc;
-use aoc_runner::{parse_error, PuzzleError, PuzzleInput, Result};
+use aoc_runner::{aoc, parse_error, PuzzleError, PuzzleInput, Result};
 use std::str::FromStr;
 
 #[aoc(year = 2023, day = 2, part = 1)]

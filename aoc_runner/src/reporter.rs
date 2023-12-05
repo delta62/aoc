@@ -1,4 +1,4 @@
-use crate::{error::Result, solution::PuzzleAnswer};
+use aoc_runner_core::{PuzzleAnswer, Result};
 
 #[derive(Debug)]
 pub struct RunResult {

@@ -78,7 +78,6 @@ dependencies = [
 name = "aoc"
 version = "0.1.0"
 dependencies = [
- "aoc_macros",
  "aoc_runner",
  "clap",
  "dotenv",
@@ -87,22 +86,30 @@ dependencies = [
 ]
 
 [[package]]
-name = "aoc_macros"
-version = "0.1.0"
-dependencies = [
- "aoc_runner",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "aoc_runner"
 version = "0.1.0"
 dependencies = [
- "inventory",
+ "aoc_runner_core",
+ "aoc_runner_macros",
  "itertools",
  "reqwest",
+]
+
+[[package]]
+name = "aoc_runner_core"
+version = "0.1.0"
+dependencies = [
+ "inventory",
+]
+
+[[package]]
+name = "aoc_runner_macros"
+version = "0.1.0"
+dependencies = [
+ "aoc_runner_core",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

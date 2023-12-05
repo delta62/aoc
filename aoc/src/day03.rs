@@ -1,5 +1,4 @@
-use aoc_macros::aoc;
-use aoc_runner::PuzzleInput;
+use aoc_runner::{aoc, PuzzleInput};
 use regex::Regex;
 
 #[aoc(year = 2023, day = 3, part = 1)]

@@ -1,5 +1,4 @@
-use aoc_macros::aoc;
-use aoc_runner::{parse_error, PuzzleInput, Result};
+use aoc_runner::{aoc, parse_error, PuzzleInput, Result};
 use std::collections::HashSet;
 
 #[aoc(year = 2023, day = 4, part = 1)]

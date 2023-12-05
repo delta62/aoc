@@ -1,8 +1,8 @@
 use crate::{
     downloader::Downloader,
     reporter::{DayReport, DefaultReporter, Reporter, RunResult},
-    solution::UniversalSolution,
 };
+use aoc_runner_core::{inventory, UniversalSolution};
 use itertools::Itertools;
 use std::path::{Path, PathBuf};
 

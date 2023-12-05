@@ -1,14 +1,13 @@
 #![feature(iterator_try_collect)]
 
-#[macro_use]
-mod error;
 mod downloader;
 mod reporter;
 mod runner;
-mod solution;
 
-pub use error::{parse_error, PuzzleError, Result};
-pub use inventory;
+pub use aoc_runner_core::{
+    inventory, parse_error, PuzzleError, PuzzleInput, PuzzleSolution, Result, SolutionOutput,
+    UniversalSolution,
+};
+pub use aoc_runner_macros::aoc;
 pub use reporter::{DefaultReporter, Reporter};
 pub use runner::Runner;
-pub use solution::{PuzzleInput, PuzzleSolution, SolutionOutput, UniversalSolution};
