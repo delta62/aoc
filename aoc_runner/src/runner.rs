@@ -1,16 +1,16 @@
-use std::path::Path;
-
 use crate::{
     downloader::Downloader,
-    reporter::{DayReport, DefaultReporter, Reporter},
+    reporter::{DayReport, DefaultReporter, Reporter, RunResult},
     solution::UniversalSolution,
 };
 use itertools::Itertools;
+use std::path::{Path, PathBuf};
 
 type Solution = &'static (dyn UniversalSolution + Sync);
 
 pub struct Runner {
     downloader: Option<Downloader>,
+    input_path: PathBuf,
     reporter: Box<dyn Reporter>,
     solutions: Vec<Box<Solution>>,
 }
@@ -19,6 +19,7 @@ impl Runner {
     pub fn new() -> Self {
         let downloader = None;
         let reporter = Box::new(DefaultReporter::new());
+        let input_path = Path::new("input").to_path_buf();
 
         let mut solutions: Vec<_> = inventory::iter::<Solution>
             .into_iter()
@@ -34,6 +35,7 @@ impl Runner {
 
         Self {
             downloader,
+            input_path,
             reporter,
             solutions,
         }
@@ -47,17 +49,23 @@ impl Runner {
         self
     }
 
+    pub fn with_input_path(mut self, path: impl AsRef<Path>) -> Self {
+        self.input_path = path.as_ref().to_path_buf();
+        self
+    }
+
     pub fn auto_download_with_token(mut self, session_token: impl Into<String>) -> Self {
         self.downloader = Some(Downloader::new(session_token));
         self
     }
 
-    fn input_path(year: u16, day: u8) -> String {
-        format!("aoc/input/{year}/day{day:02}.txt")
+    fn input_path(&self, year: u16, day: u8) -> String {
+        let base = self.input_path.to_str().unwrap();
+        format!("{base}/{year}/day{day:02}.txt")
     }
 
     fn should_fetch_input(&self, year: u16, day: u8) -> bool {
-        let input_path = Self::input_path(year, day);
+        let input_path = self.input_path(year, day);
         let already_have_input = Path::new(&input_path).exists();
 
         self.downloader.is_some() && !already_have_input
@@ -69,30 +77,18 @@ impl Runner {
             self.downloader.as_ref().unwrap().fetch(year, day, &out_dir);
         }
 
-        let input = std::fs::read(Self::input_path(year, day)).unwrap();
-
-        let mut part1 = None;
-        let mut part2 = None;
-
-        self.solutions
+        let input = std::fs::read(self.input_path(year, day)).unwrap();
+        let results = self
+            .solutions
             .iter()
             .filter(|s| s.year() == year && s.day() == day)
-            .for_each(|s| {
-                let result = s.solve(&input);
+            .map(|s| RunResult {
+                part: s.part(),
+                answer: s.solve(&input),
+            })
+            .collect();
 
-                match s.part() {
-                    1 => part1 = Some(result),
-                    2 => part2 = Some(result),
-                    _ => todo!(),
-                }
-            });
-
-        let report = DayReport {
-            year,
-            day,
-            part1,
-            part2,
-        };
+        let report = DayReport { year, day, results };
         self.reporter.report_day(&report);
     }
 

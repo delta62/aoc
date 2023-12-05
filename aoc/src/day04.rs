@@ -89,11 +89,8 @@ mod tests {
 
     #[test]
     fn example_1() {
-        let input = example_str!("2023/d4e1.txt");
-        let input = input
-            .lines()
-            .map(|line| Ticket::parse(line.as_bytes()).unwrap())
-            .collect();
+        let input = example_bytes!("2023/d4e1.txt");
+        let input = <Vec<Ticket>>::parse(&input).unwrap();
         let result = part1(input);
         assert_eq!(result, 13);
     }

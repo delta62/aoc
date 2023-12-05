@@ -9,3 +9,4 @@ regex = "1.10.2"
 aoc_macros = { path = "../aoc_macros" }
 aoc_runner = { path = "../aoc_runner" }
 dotenv = "0.15.0"
+clap = { version = "4.4.11", features = ["derive"] }

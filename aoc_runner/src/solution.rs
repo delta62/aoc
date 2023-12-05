@@ -1,5 +1,15 @@
 use crate::error::{PuzzleError, Result};
-use std::fmt::Display;
+use std::{
+    fmt::Display,
+    time::{Duration, Instant},
+};
+
+#[derive(Debug)]
+pub struct PuzzleAnswer {
+    pub parse_duration: Duration,
+    pub solve_duration: Duration,
+    pub result: String,
+}
 
 pub trait UniversalSolution {
     fn year(&self) -> u16;
@@ -8,7 +18,7 @@ pub trait UniversalSolution {
 
     fn part(&self) -> u8;
 
-    fn solve(&self, input: &[u8]) -> Result<String>;
+    fn solve(&self, input: &[u8]) -> Result<PuzzleAnswer>;
 }
 
 inventory::collect!(&'static (dyn UniversalSolution + Sync));
@@ -29,9 +39,20 @@ where
         self.part()
     }
 
-    fn solve(&self, input: &[u8]) -> Result<String> {
+    fn solve(&self, input: &[u8]) -> Result<PuzzleAnswer> {
+        let start_time = Instant::now();
+
         let input = <T as PuzzleSolution>::Input::parse(input)?;
-        Ok(self.solve(input).to_string())
+        let parse_duration = Instant::now().duration_since(start_time);
+
+        let result = self.solve(input).to_string();
+        let solve_duration = Instant::now().duration_since(start_time) - parse_duration;
+
+        Ok(PuzzleAnswer {
+            parse_duration,
+            solve_duration,
+            result,
+        })
     }
 }
 

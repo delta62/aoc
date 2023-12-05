@@ -1,11 +1,16 @@
-use crate::error::Result;
+use crate::{error::Result, solution::PuzzleAnswer};
+
+#[derive(Debug)]
+pub struct RunResult {
+    pub part: u8,
+    pub answer: Result<PuzzleAnswer>,
+}
 
 #[derive(Debug)]
 pub struct DayReport {
     pub year: u16,
     pub day: u8,
-    pub part1: Option<Result<String>>,
-    pub part2: Option<Result<String>>,
+    pub results: Vec<RunResult>,
 }
 
 pub trait Reporter {
@@ -23,23 +28,35 @@ impl DefaultReporter {
         Self {}
     }
 
-    pub fn report_part(part: usize, result: &Result<String>) {
-        let result = result.as_ref().unwrap();
-        println!("    Part {part}: {result}");
+    pub fn report_part(result: &RunResult) {
+        let part = result.part;
+
+        match &result.answer {
+            Ok(res) => {
+                let parse_duration = res.parse_duration;
+                let solve_duration = res.solve_duration;
+                let answer = &res.result;
+
+                println!("    part {part}: {answer}");
+                println!("      parse: {parse_duration:?}");
+                println!("      solve: {solve_duration:?}");
+                println!();
+            }
+            Err(err) => {
+                println!("    part {part}: error");
+                println!("    {err}");
+            }
+        }
     }
 }
 
 impl Reporter for DefaultReporter {
     fn report_day(&self, report: &DayReport) {
         println!("Advent of Code {} - Day {}", report.year, report.day);
-        report
-            .part1
-            .as_ref()
-            .map(|result| Self::report_part(1, result));
-        report
-            .part2
-            .as_ref()
-            .map(|result| Self::report_part(2, result));
+
+        for result in &report.results {
+            Self::report_part(result);
+        }
     }
 
     fn report_no_solutions(&self) {
