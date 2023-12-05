@@ -13,6 +13,7 @@ pub struct DayReport {
     pub results: Vec<RunResult>,
 }
 
+/// A reporter is used to give users feedback about their solutions
 pub trait Reporter {
     /// Show the user results of running their solution for a given day
     fn report_day(&self, report: &DayReport);
@@ -21,6 +22,7 @@ pub trait Reporter {
     fn report_no_solutions(&self);
 }
 
+/// A text reporter which writes to stdout
 pub struct DefaultReporter;
 
 impl DefaultReporter {

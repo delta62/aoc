@@ -132,7 +132,7 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
 
     let solution_collection_struct = quote! {
         ::aoc_runner::inventory::submit! {
-            &#struct_name as &(dyn ::aoc_runner::UniversalSolution + Sync + 'static)
+            &#struct_name as &(dyn ::aoc_runner::Solution + Sync + 'static)
         }
     };
 

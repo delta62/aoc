@@ -1,5 +1,6 @@
-use reqwest::{blocking::Client, Result, StatusCode};
-use std::{fs, io, path::Path};
+use crate::error::{RunnerError, RunnerResult};
+use reqwest::{blocking::Client, StatusCode};
+use std::{fs, path::Path};
 
 pub struct Downloader {
     client: Client,
@@ -16,29 +17,33 @@ impl Downloader {
         }
     }
 
-    pub fn fetch(&self, year: u16, day: u8, out_dir: impl AsRef<Path>) -> Result<()> {
+    pub fn fetch(&self, year: u16, day: u8, out_dir: impl AsRef<Path>) -> RunnerResult<()> {
         let url = format!("https://adventofcode.com/{year}/day/{day}/input");
         let session_token = &self.session_token;
         let response = self
             .client
             .get(url)
             .header("Cookie", format!("session={session_token}"))
-            .send()?;
+            .send()
+            .map_err(RunnerError::DownloadError)?;
 
-        if response.status() != StatusCode::OK {
-            panic!("Failed to fetch");
+        match response.status() {
+            StatusCode::OK => self.save_to_file(
+                &response.bytes().map_err(RunnerError::DownloadError)?,
+                day,
+                out_dir,
+            ),
+            _status => {
+                todo!("Received unexpected status code")
+            }
         }
-
-        self.save_to_file(&response.bytes()?, day, out_dir).unwrap();
-
-        Ok(())
     }
 
-    fn save_to_file(&self, bytes: &[u8], day: u8, out_dir: impl AsRef<Path>) -> io::Result<()> {
+    fn save_to_file(&self, bytes: &[u8], day: u8, out_dir: impl AsRef<Path>) -> RunnerResult<()> {
         let out_dir = out_dir.as_ref();
-        fs::create_dir_all(out_dir)?;
+        fs::create_dir_all(out_dir).map_err(RunnerError::IoError)?;
 
         let out_file = out_dir.join(format!("day{day:02}.txt"));
-        fs::write(out_file, bytes)
+        fs::write(out_file, bytes).map_err(RunnerError::IoError)
     }
 }

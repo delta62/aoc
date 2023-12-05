@@ -5,4 +5,4 @@ mod solution;
 
 pub use error::{PuzzleError, Result};
 pub use inventory;
-pub use solution::{PuzzleAnswer, PuzzleInput, PuzzleSolution, SolutionOutput, UniversalSolution};
+pub use solution::{PuzzleAnswer, PuzzleInput, PuzzleSolution, Solution, SolutionOutput};

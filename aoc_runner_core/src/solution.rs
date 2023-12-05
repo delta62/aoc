@@ -3,24 +3,41 @@ use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 pub struct PuzzleAnswer {
+    /// The amount of time it took to parse from the raw input string to a data type
+    /// required by the solver
     pub parse_duration: Duration,
+
+    /// The amount of time it took to run the solver on the pre-parsed input
     pub solve_duration: Duration,
+
+    /// The result of running the solver
     pub result: Result<String>,
 }
 
-pub trait UniversalSolution {
+/// A generalized Advent of Code solver. You will generally want to
+/// implement [`PuzzleSolution`] for your types, and the runtime will
+/// automatically convert between those types and this one. The advantage
+/// of `PuzzleSolution` over this more generalized trait are the dynamic
+/// input and output types - the runtime will be able to automatically parse
+/// inputs and handle errors gracefully.
+pub trait Solution {
+    /// The year this solution is for
     fn year(&self) -> u16;
 
+    /// The day of advent (1-25, implicitly in December) that this solution is for
     fn day(&self) -> u8;
 
+    /// The part of the day (1 or 2) that this solution is for
     fn part(&self) -> u8;
 
+    /// Attempt to solve for the given input, returning the result along with
+    /// timing metrics related to each phase of the solution
     fn solve(&self, input: &[u8]) -> PuzzleAnswer;
 }
 
-inventory::collect!(&'static (dyn UniversalSolution + Sync));
+inventory::collect!(&'static (dyn Solution + Sync));
 
-impl<T> UniversalSolution for T
+impl<T> Solution for T
 where
     T: PuzzleSolution,
 {
@@ -62,19 +79,28 @@ where
 }
 
 pub trait PuzzleSolution {
+    /// The type of input required to run this solution
     type Input<'a>: PuzzleInput<'a>;
+
+    /// The result of running this solution
     type Output: SolutionOutput;
 
+    /// The year this solution is for
     fn year(&self) -> u16;
 
+    /// The day of advent (1-25, implicitly in December) that this solution is for
     fn day(&self) -> u8;
 
+    /// The part of the day (1 or 2) that this solution is for
     fn part(&self) -> u8;
 
+    /// Attempt to solve for the given input
     fn solve<'i>(&self, input: Self::Input<'i>) -> Self::Output;
 }
 
+/// A type which can be provided to an Advent of Code solver function
 pub trait PuzzleInput<'a>: Sized {
+    /// Attempt to parse an instance of this type from raw puzzle input
     fn parse(input: &'a [u8]) -> Result<Self>;
 }
 
@@ -100,6 +126,7 @@ where
     }
 }
 
+/// A value which can be returned from an Advent of Code solver function
 pub trait SolutionOutput {
     fn to_string(&self) -> Result<String>;
 }

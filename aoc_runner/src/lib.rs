@@ -4,8 +4,8 @@ mod reporter;
 mod runner;
 
 pub use aoc_runner_core::{
-    inventory, parse, parse_opt, PuzzleError, PuzzleInput, PuzzleSolution, Result, SolutionOutput,
-    UniversalSolution,
+    inventory, parse, parse_opt, PuzzleError, PuzzleInput, PuzzleSolution, Result, Solution,
+    SolutionOutput,
 };
 pub use aoc_runner_macros::aoc;
 pub use error::{RunnerError, RunnerResult};
