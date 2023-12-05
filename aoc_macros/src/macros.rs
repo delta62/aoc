@@ -57,9 +57,9 @@ impl Parse for PuzzleAnswer {
 
         for arg in args {
             match arg {
-                Arg::Day { value, .. } => day = Some(value.base10_parse()?),
-                Arg::Year { value, .. } => year = Some(value.base10_parse()?),
-                Arg::Part { value, .. } => part = Some(value.base10_parse()?),
+                Arg::Day(value) => day = Some(value.base10_parse()?),
+                Arg::Year(value) => year = Some(value.base10_parse()?),
+                Arg::Part(value) => part = Some(value.base10_parse()?),
             }
         }
 
@@ -95,29 +95,6 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
     let mut input_generics = Generics::default();
     input_generics.params.push(lifetime);
 
-    let sometype = *f.input_pat.ty;
-
-    // let foo = match sometype.clone() {
-    //     Type::Array(_) => "array",
-    //     Type::BareFn(_) => "barefn",
-    //     Type::Group(_) => "group",
-    //     Type::ImplTrait(_) => "impltrait",
-    //     Type::Infer(_) => "infer",
-    //     Type::Macro(_) => "macro",
-    //     Type::Never(_) => "never",
-    //     Type::Paren(_) => "paren",
-    //     Type::Path(_) => "path",
-    //     Type::Ptr(_) => "ptr",
-    //     Type::Reference(_) => "reference",
-    //     Type::Slice(_) => "slice",
-    //     Type::TraitObject(_) => "traitobj",
-    //     Type::Tuple(_) => "tuple",
-    //     Type::Verbatim(_) => "verbatim",
-    //     x => "wtf",
-    // };
-
-    // dbg!(foo);
-
     let input = ImplItemType {
         attrs: vec![],
         vis: syn::Visibility::Inherited,
@@ -126,7 +103,7 @@ pub fn aoc(attr: TokenStream, mut item: TokenStream) -> TokenStream {
         ident: format_ident!("Input"),
         generics: input_generics,
         eq_token: Default::default(),
-        ty: sometype,
+        ty: *f.input_pat.ty,
         semi_token: Default::default(),
     };
 

@@ -1,3 +1,5 @@
 .aoc-session
+.env
+/aoc/input/
 /input/
 /target/

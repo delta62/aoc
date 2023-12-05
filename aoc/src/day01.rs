@@ -2,7 +2,6 @@ use crate::input::Lines;
 use aoc_macros::aoc;
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::convert::Infallible;
 
 #[aoc(year = 2023, day = 1, part = 1)]
 fn part1<'a>(input: Lines<'a>) -> u32 {
@@ -10,8 +9,8 @@ fn part1<'a>(input: Lines<'a>) -> u32 {
 }
 
 #[aoc(year = 2023, day = 1, part = 2)]
-fn part2<'a>(input: Lines<'a>) -> Result<u32, Infallible> {
-    Ok(input.iter().map(spelling_sum).sum())
+fn part2<'a>(input: Lines<'a>) -> u32 {
+    input.iter().map(spelling_sum).sum()
 }
 
 fn line_sum(line: &str) -> u32 {
@@ -74,26 +73,17 @@ mod tests {
 
     #[test]
     fn example_1_works() {
-        let input = "1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet";
-        let input = Lines::new(input);
+        let input = example_str!("2023/d1e1.txt");
+        let input = Lines::new(&input);
         let result = part1(input);
         assert_eq!(result, 142);
     }
 
     #[test]
     fn example_2_works() {
-        let input = "two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen";
-        let input = Lines::new(input);
-        let result = part2(input).unwrap();
+        let input = example_str!("2023/d1e2.txt");
+        let input = Lines::new(&input);
+        let result = part2(input);
         assert_eq!(result, 281);
     }
 
@@ -101,7 +91,7 @@ zoneight234
     fn part2_overlap() {
         let input = "2oneight";
         let input = Lines::new(input);
-        let result = part2(input).unwrap();
+        let result = part2(input);
         assert_eq!(result, 28);
     }
 }

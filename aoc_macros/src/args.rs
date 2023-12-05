@@ -1,6 +1,6 @@
 use syn::{
     parse::{Parse, ParseStream},
-    LitInt, Result, Token
+    LitInt, Result, Token,
 };
 
 mod kw {
@@ -10,21 +10,9 @@ mod kw {
 }
 
 pub(crate) enum Arg {
-    Year {
-        year_token: kw::year,
-        eq_token: Token![=],
-        value: LitInt,
-    },
-    Day {
-        day_token: kw::day,
-        eq_token: Token![=],
-        value: LitInt,
-    },
-    Part {
-        part_token: kw::part,
-        eq_token: Token![=],
-        value: LitInt,
-    },
+    Year(LitInt),
+    Day(LitInt),
+    Part(LitInt),
 }
 
 impl Parse for Arg {
@@ -32,23 +20,17 @@ impl Parse for Arg {
         let lookahead = input.lookahead1();
 
         if lookahead.peek(kw::year) {
-            Ok(Self::Year {
-                year_token: input.parse::<kw::year>()?,
-                eq_token: input.parse()?,
-                value: input.parse()?,
-            })
+            input.parse::<kw::year>()?;
+            input.parse::<Token![=]>()?;
+            Ok(Self::Year(input.parse()?))
         } else if lookahead.peek(kw::day) {
-            Ok(Self::Day {
-                day_token: input.parse::<kw::day>()?,
-                eq_token: input.parse()?,
-                value: input.parse()?,
-            })
+            input.parse::<kw::day>()?;
+            input.parse::<Token![=]>()?;
+            Ok(Self::Day(input.parse()?))
         } else if lookahead.peek(kw::part) {
-            Ok(Self::Part {
-                part_token: input.parse::<kw::part>()?,
-                eq_token: input.parse()?,
-                value: input.parse()?,
-            })
+            input.parse::<kw::part>()?;
+            input.parse::<Token![=]>()?;
+            Ok(Self::Part(input.parse()?))
         } else {
             Err(lookahead.error())
         }

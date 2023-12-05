@@ -24,11 +24,14 @@ struct Number {
 
 impl Number {
     fn overlaps(&self, x: usize, y: usize) -> bool {
-        let len: usize = (self.value as f64).log10().floor() as usize;
         x >= self.x.saturating_sub(1)
-            && x <= self.x + len + 1
+            && x <= self.x + self.len() + 1
             && y >= self.y.saturating_sub(1)
             && y <= self.y + 1
+    }
+
+    fn len(&self) -> usize {
+        (self.value as f64).log10().floor() as usize
     }
 }
 
@@ -105,16 +108,7 @@ mod tests {
 
     #[test]
     fn example1() {
-        let input = "467..114..
-...*......
-..35..633.
-......#...
-617*......
-.....+.58.
-..592.....
-......755.
-...$.*....
-.664.598..";
+        let input = example_str!("2023/d3e1.txt");
         let input = Grid::parse(input.as_bytes()).unwrap();
         let result = part1(input);
         assert_eq!(result, 4361);
@@ -122,16 +116,7 @@ mod tests {
 
     #[test]
     fn example2() {
-        let input = "467..114..
-...*......
-..35..633.
-......#...
-617*......
-.....+.58.
-..592.....
-......755.
-...$.*....
-.664.598..";
+        let input = example_str!("2023/d3e1.txt");
         let input = Grid::parse(input.as_bytes()).unwrap();
         let result = part2(input);
         assert_eq!(result, 467835);
