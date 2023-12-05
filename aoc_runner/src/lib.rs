@@ -1,12 +1,13 @@
 #![feature(iterator_try_collect)]
 
-mod downloader;
+#[macro_use]
 mod error;
+mod downloader;
 mod reporter;
 mod runner;
 mod solution;
 
-pub use error::{PuzzleError, Result};
+pub use error::{parse_error, PuzzleError, Result};
 pub use inventory;
 pub use reporter::{DefaultReporter, Reporter};
 pub use runner::Runner;

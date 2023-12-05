@@ -1,10 +1,15 @@
 use aoc_macros::aoc;
-use aoc_runner::PuzzleInput;
+use aoc_runner::{parse_error, PuzzleInput, Result};
 use std::collections::HashSet;
 
 #[aoc(year = 2023, day = 4, part = 1)]
 fn part1<'a>(input: Vec<Ticket>) -> usize {
     input.into_iter().map(|ticket| ticket.score()).sum()
+}
+
+#[aoc(year = 2023, day = 4, part = 2)]
+fn part2<'a>(input: TicketStack) -> usize {
+    input.ticket_count()
 }
 
 pub struct Ticket {
@@ -14,7 +19,7 @@ pub struct Ticket {
 
 impl Ticket {
     fn score(&self) -> usize {
-        let winning_count = self.mine.intersection(&self.winning).count();
+        let winning_count = self.winning_count();
 
         if winning_count == 0 {
             0
@@ -23,24 +28,58 @@ impl Ticket {
             2usize.pow(exp)
         }
     }
+
+    fn winning_count(&self) -> usize {
+        self.mine.intersection(&self.winning).count()
+    }
 }
 
 impl<'a> PuzzleInput<'a> for Ticket {
-    fn parse(input: &'a [u8]) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a [u8]) -> Result<Self> {
         let input = <&str as PuzzleInput>::parse(input)?;
-        let (winning, mine) = input.split_once('|').unwrap();
-        let (_card_num, winning) = winning.split_once(':').unwrap();
+        let (winning, mine) = input
+            .split_once('|')
+            .ok_or(parse_error("input line didn't contain a '|'"))?;
 
-        let winning = winning
-            .split_whitespace()
-            .map(|s| usize::from_str_radix(s, 10).unwrap())
-            .collect();
-        let mine = mine
-            .split_whitespace()
-            .map(|s| usize::from_str_radix(s, 10).unwrap())
-            .collect();
+        let (_card_num, winning) = winning
+            .split_once(':')
+            .ok_or(parse_error("input line didn't contain a ':'"))?;
+
+        let winning = numbers!(winning => usize)?;
+        let mine = numbers!(mine => usize)?;
 
         Ok(Ticket { mine, winning })
+    }
+}
+
+pub struct TicketStack {
+    tickets: Vec<Ticket>,
+}
+
+impl TicketStack {
+    fn ticket_count(&self) -> usize {
+        let mut ticket_counts = vec![1; self.tickets.len()];
+
+        for (i, ticket) in self.tickets.iter().enumerate() {
+            let match_count = ticket.winning_count();
+            let increment_count = ticket_counts[i];
+            let start = i + 1;
+            let end = inc_start_index + match_count;
+
+            for x in &mut ticket_counts[start..end] {
+                *x += increment_count;
+            }
+        }
+
+        ticket_counts.into_iter().sum()
+    }
+}
+
+impl<'a> PuzzleInput<'a> for TicketStack {
+    fn parse(input: &'a [u8]) -> Result<Self> {
+        let tickets = <Vec<Ticket>>::parse(input)?;
+
+        Ok(Self { tickets })
     }
 }
 
@@ -57,5 +96,13 @@ mod tests {
             .collect();
         let result = part1(input);
         assert_eq!(result, 13);
+    }
+
+    #[test]
+    fn example_2() {
+        let input = example_bytes!("2023/d4e1.txt");
+        let input = TicketStack::parse(&input).unwrap();
+        let result = part2(input);
+        assert_eq!(result, 30);
     }
 }

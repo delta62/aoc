@@ -1,12 +1,16 @@
+#![feature(iterator_try_collect)]
+
 #[cfg(test)]
 #[macro_use]
 mod test_helpers;
+
+#[macro_use]
+mod input;
 
 mod day01;
 mod day02;
 mod day03;
 mod day04;
-mod input;
 
 use aoc_runner::Runner;
 use std::env;

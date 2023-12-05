@@ -18,3 +18,22 @@ impl<'a> PuzzleInput<'a> for Lines<'a> {
         Ok(Lines::new(s))
     }
 }
+
+/// Parse several numbers separated by whitespace or the given separator
+macro_rules! numbers {
+    ($expr:expr => $type:ty) => {
+        $expr
+            .split_whitespace()
+            .map(|x| <$type>::from_str_radix(x, 10))
+            .try_collect()
+            .map_err(|_| ::aoc_runner::parse_error("Unable to parse whitespace-separated integers"))
+    };
+
+    ($expr:expr => $type:ty; $sep:literal) => {
+        $expr
+            .split($sep)
+            .map(|x| <$type>::from_str_radix(x, 10))
+            .try_collect()
+            .map_err(|_| ::aoc_runner::parse_error("Unable to parse separated integers"))
+    };
+}

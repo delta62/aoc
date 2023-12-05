@@ -1,5 +1,6 @@
 use aoc_macros::aoc;
-use aoc_runner::PuzzleInput;
+use aoc_runner::{parse_error, PuzzleError, PuzzleInput, Result};
+use std::str::FromStr;
 
 #[aoc(year = 2023, day = 2, part = 1)]
 fn part1(input: Vec<Game>) -> usize {
@@ -28,16 +29,19 @@ pub struct Game {
 }
 
 impl<'a> PuzzleInput<'a> for Game {
-    fn parse(input: &'a [u8]) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a [u8]) -> Result<Self> {
         let input = <&str as PuzzleInput>::parse(input)?;
-        let (game_id, samples) = input.split_once(':').unwrap();
-        let game_id = game_id.strip_prefix("Game ").unwrap();
-        let id = game_id.parse::<usize>().unwrap();
+        let (game_id, samples) = input
+            .split_once(':')
+            .ok_or(parse_error("No ':' separating game ID from samples"))?;
+        let game_id = game_id
+            .strip_prefix("Game ")
+            .ok_or(parse_error("No 'Game ' at beginning of input line"))?;
+        let id = game_id
+            .parse::<usize>()
+            .map_err(|_| parse_error("Game ID was not an integer"))?;
 
-        let samples = samples
-            .split(';')
-            .map(|s| Sample::parse(s.trim()))
-            .collect();
+        let samples = samples.split(';').map(|s| s.trim().parse()).try_collect()?;
 
         Ok(Self { id, samples })
     }
@@ -95,14 +99,18 @@ struct Sample {
     green: usize,
 }
 
-impl Sample {
-    fn parse(input: &str) -> Self {
-        input
-            .split(',')
+impl FromStr for Sample {
+    type Err = PuzzleError;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        s.split(',')
             .map(|s| s.trim())
-            .fold(Default::default(), |mut acc, s| {
-                let (quantity, color) = s.split_once(' ').unwrap();
-                let quantity = usize::from_str_radix(quantity, 10).unwrap();
+            .try_fold(Sample::default(), |mut acc, s| {
+                let (quantity, color) = s
+                    .split_once(' ')
+                    .ok_or(parse_error("no space separating quantity from color"))?;
+                let quantity = usize::from_str_radix(quantity, 10)
+                    .map_err(|_| parse_error("quantity was not an integer"))?;
 
                 match color {
                     "red" => acc.red += quantity,
@@ -111,10 +119,12 @@ impl Sample {
                     _ => unreachable!(),
                 }
 
-                acc
+                Ok(acc)
             })
     }
+}
 
+impl Sample {
     fn subset_of(&self, other: &Self) -> bool {
         self.red <= other.red && self.green <= other.green && self.blue <= other.blue
     }

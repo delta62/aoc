@@ -3,6 +3,11 @@ use std::fmt::Display;
 #[derive(Debug)]
 pub enum PuzzleError {
     Fail,
+    ParseError(&'static str),
+}
+
+pub fn parse_error(reason: &'static str) -> PuzzleError {
+    PuzzleError::ParseError(reason)
 }
 
 impl Display for PuzzleError {
