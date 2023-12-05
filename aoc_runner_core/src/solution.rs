@@ -1,14 +1,11 @@
 use crate::error::{PuzzleError, Result};
-use std::{
-    fmt::Display,
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 pub struct PuzzleAnswer {
     pub parse_duration: Duration,
     pub solve_duration: Duration,
-    pub result: String,
+    pub result: Result<String>,
 }
 
 pub trait UniversalSolution {
@@ -18,7 +15,7 @@ pub trait UniversalSolution {
 
     fn part(&self) -> u8;
 
-    fn solve(&self, input: &[u8]) -> Result<PuzzleAnswer>;
+    fn solve(&self, input: &[u8]) -> PuzzleAnswer;
 }
 
 inventory::collect!(&'static (dyn UniversalSolution + Sync));
@@ -39,20 +36,20 @@ where
         self.part()
     }
 
-    fn solve(&self, input: &[u8]) -> Result<PuzzleAnswer> {
+    fn solve(&self, input: &[u8]) -> PuzzleAnswer {
         let start_time = Instant::now();
 
-        let input = <T as PuzzleSolution>::Input::parse(input)?;
+        let input = <T as PuzzleSolution>::Input::parse(input).unwrap();
         let parse_duration = Instant::now().duration_since(start_time);
 
         let result = self.solve(input).to_string();
         let solve_duration = Instant::now().duration_since(start_time) - parse_duration;
 
-        Ok(PuzzleAnswer {
+        PuzzleAnswer {
             parse_duration,
             solve_duration,
             result,
-        })
+        }
     }
 }
 
@@ -99,36 +96,23 @@ where
 }
 
 pub trait SolutionOutput {
-    fn to_string(&self) -> String;
+    fn to_string(&self) -> Result<String>;
 }
 
 impl SolutionOutput for String {
-    fn to_string(&self) -> String {
-        ToString::to_string(self)
+    fn to_string(&self) -> Result<String> {
+        Ok(ToString::to_string(self))
     }
 }
 
 impl SolutionOutput for u32 {
-    fn to_string(&self) -> String {
-        ToString::to_string(self)
+    fn to_string(&self) -> Result<String> {
+        Ok(ToString::to_string(self))
     }
 }
 
 impl SolutionOutput for usize {
-    fn to_string(&self) -> String {
-        ToString::to_string(self)
-    }
-}
-
-impl<T, E> SolutionOutput for std::result::Result<T, E>
-where
-    T: Display,
-    E: Display,
-{
-    fn to_string(&self) -> String {
-        match self {
-            Ok(solution) => solution.to_string(),
-            Err(err) => err.to_string(),
-        }
+    fn to_string(&self) -> Result<String> {
+        Ok(ToString::to_string(self))
     }
 }

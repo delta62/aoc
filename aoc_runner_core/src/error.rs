@@ -4,6 +4,7 @@ use std::fmt::Display;
 pub enum PuzzleError {
     Fail,
     ParseError(&'static str),
+    SolutionError(String),
 }
 
 pub fn parse_error(reason: &'static str) -> PuzzleError {

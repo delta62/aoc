@@ -1,9 +1,9 @@
-use aoc_runner_core::{PuzzleAnswer, Result};
+use aoc_runner_core::PuzzleAnswer;
 
 #[derive(Debug)]
 pub struct RunResult {
     pub part: u8,
-    pub answer: Result<PuzzleAnswer>,
+    pub answer: PuzzleAnswer,
 }
 
 #[derive(Debug)]
@@ -31,13 +31,12 @@ impl DefaultReporter {
     pub fn report_part(result: &RunResult) {
         let part = result.part;
 
-        match &result.answer {
+        match &result.answer.result {
             Ok(res) => {
-                let parse_duration = res.parse_duration;
-                let solve_duration = res.solve_duration;
-                let answer = &res.result;
+                let parse_duration = result.answer.parse_duration;
+                let solve_duration = result.answer.solve_duration;
 
-                println!("    part {part}: {answer}");
+                println!("    part {part}: {res}");
                 println!("      parse: {parse_duration:?}");
                 println!("      solve: {solve_duration:?}");
                 println!();
