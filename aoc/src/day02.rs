@@ -1,4 +1,4 @@
-use aoc_runner::{aoc, parse_error, PuzzleError, PuzzleInput, Result};
+use aoc_runner::{aoc, parse, parse_opt, PuzzleError, PuzzleInput, Result};
 use std::str::FromStr;
 
 #[aoc(year = 2023, day = 2, part = 1)]
@@ -30,15 +30,15 @@ pub struct Game {
 impl<'a> PuzzleInput<'a> for Game {
     fn parse(input: &'a [u8]) -> Result<Self> {
         let input = <&str as PuzzleInput>::parse(input)?;
-        let (game_id, samples) = input
-            .split_once(':')
-            .ok_or(parse_error("No ':' separating game ID from samples"))?;
-        let game_id = game_id
-            .strip_prefix("Game ")
-            .ok_or(parse_error("No 'Game ' at beginning of input line"))?;
-        let id = game_id
-            .parse::<usize>()
-            .map_err(|_| parse_error("Game ID was not an integer"))?;
+        let (game_id, samples) = parse_opt!(
+            input.split_once(':'),
+            "No ':' separating game ID from samples"
+        )?;
+        let game_id = parse_opt!(
+            game_id.strip_prefix("Game "),
+            "No 'Game ' at beginning of input line"
+        )?;
+        let id = parse!(game_id.parse::<usize>(), "Game ID was not an integer")?;
 
         let samples = samples.split(';').map(|s| s.trim().parse()).try_collect()?;
 
@@ -105,12 +105,12 @@ impl FromStr for Sample {
         s.split(',')
             .map(|s| s.trim())
             .try_fold(Sample::default(), |mut acc, s| {
-                let (quantity, color) = s
-                    .split_once(' ')
-                    .ok_or(parse_error("no space separating quantity from color"))?;
-                let quantity = quantity
-                    .parse::<usize>()
-                    .map_err(|_| parse_error("quantity was not an integer"))?;
+                let (quantity, color) = s.split_once(' ').ok_or(PuzzleError::ParseError(
+                    "no space separating quantity from color".to_string(),
+                ))?;
+                let quantity = quantity.parse::<usize>().map_err(|_| {
+                    PuzzleError::ParseError("quantity was not an integer".to_string())
+                })?;
 
                 match color {
                     "red" => acc.red += quantity,

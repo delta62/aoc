@@ -12,23 +12,28 @@ mod day02;
 mod day03;
 mod day04;
 
-use aoc_runner::Runner;
+use aoc_runner::{Runner, RunnerResult};
 use args::Args;
 use clap::Parser;
 use std::env;
 
-pub fn main() {
-    dotenv::dotenv().unwrap();
-    let session_token = env::var("AOC_SESSION").unwrap();
+pub fn main() -> RunnerResult<()> {
+    if dotenv::dotenv().is_err() {
+        eprintln!("Warning: No .env file found");
+    }
 
+    let session_token = env::var("AOC_SESSION").expect("No session token is set");
     let args = Args::parse();
+
     let runner = Runner::new()
         .auto_download_with_token(session_token)
         .with_input_path("aoc/input");
 
     if args.all {
-        runner.run_all();
+        runner.run_all()?;
     } else {
-        runner.run_latest_day();
+        runner.run_latest_day()?;
     }
+
+    Ok(())
 }

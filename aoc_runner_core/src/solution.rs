@@ -39,16 +39,24 @@ where
     fn solve(&self, input: &[u8]) -> PuzzleAnswer {
         let start_time = Instant::now();
 
-        let input = <T as PuzzleSolution>::Input::parse(input).unwrap();
-        let parse_duration = Instant::now().duration_since(start_time);
+        let input = <T as PuzzleSolution>::Input::parse(input);
+        match input {
+            Ok(input) => {
+                let parse_duration = Instant::now().duration_since(start_time);
+                let result = self.solve(input).to_string();
+                let solve_duration = Instant::now().duration_since(start_time) - parse_duration;
 
-        let result = self.solve(input).to_string();
-        let solve_duration = Instant::now().duration_since(start_time) - parse_duration;
-
-        PuzzleAnswer {
-            parse_duration,
-            solve_duration,
-            result,
+                PuzzleAnswer {
+                    parse_duration,
+                    solve_duration,
+                    result,
+                }
+            }
+            Err(err) => PuzzleAnswer {
+                parse_duration: Default::default(),
+                solve_duration: Default::default(),
+                result: Err(err),
+            },
         }
     }
 }
@@ -72,7 +80,8 @@ pub trait PuzzleInput<'a>: Sized {
 
 impl<'a> PuzzleInput<'a> for &'a str {
     fn parse(input: &'a [u8]) -> Result<Self> {
-        std::str::from_utf8(input).map_err(|_| PuzzleError::Fail)
+        std::str::from_utf8(input)
+            .map_err(|_| PuzzleError::ParseError("Input is not valid UTF-8".to_owned()))
     }
 }
 
@@ -87,11 +96,7 @@ where
             lines.pop(); // Empty line at end of file
         }
 
-        lines
-            .into_iter()
-            .map(|line| T::parse(line))
-            .try_collect()
-            .map_err(|_| PuzzleError::Fail)
+        lines.into_iter().map(|line| T::parse(line)).try_collect()
     }
 }
 

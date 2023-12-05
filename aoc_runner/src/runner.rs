@@ -1,5 +1,6 @@
 use crate::{
     downloader::Downloader,
+    error::{RunnerError, RunnerResult},
     reporter::{DayReport, DefaultReporter, Reporter, RunResult},
 };
 use aoc_runner_core::{inventory, UniversalSolution};
@@ -60,24 +61,35 @@ impl Runner {
     }
 
     fn input_path(&self, year: u16, day: u8) -> String {
+        // SAFETY: This value came from a string, so it can be put back into one
         let base = self.input_path.to_str().unwrap();
         format!("{base}/{year}/day{day:02}.txt")
     }
 
-    fn should_fetch_input(&self, year: u16, day: u8) -> bool {
-        let input_path = self.input_path(year, day);
-        let already_have_input = Path::new(&input_path).exists();
+    fn downloader_opt(&self, year: u16, day: u8) -> Option<&Downloader> {
+        self.downloader.as_ref().and_then(|downloader| {
+            let input_path = self.input_path(year, day);
+            let already_have_input = Path::new(&input_path).exists();
 
-        self.downloader.is_some() && !already_have_input
+            if !already_have_input {
+                None
+            } else {
+                Some(downloader)
+            }
+        })
     }
 
-    fn run_day(&self, year: u16, day: u8) {
-        if self.should_fetch_input(year, day) {
-            let out_dir = format!("aoc/input/{year}");
-            self.downloader.as_ref().unwrap().fetch(year, day, &out_dir);
+    fn run_day(&self, year: u16, day: u8) -> RunnerResult<()> {
+        if let Some(downloader) = self.downloader_opt(year, day) {
+            // SAFETY: This value came from a string, so it can be put back into one
+            let base = self.input_path.to_str().unwrap();
+            let out_dir = format!("{base}/{year}");
+            downloader
+                .fetch(year, day, &out_dir)
+                .map_err(RunnerError::DownloadError)?;
         }
 
-        let input = std::fs::read(self.input_path(year, day)).unwrap();
+        let input = std::fs::read(self.input_path(year, day)).map_err(RunnerError::IoError)?;
         let results = self
             .solutions
             .iter()
@@ -90,25 +102,30 @@ impl Runner {
 
         let report = DayReport { year, day, results };
         self.reporter.report_day(&report);
+
+        Ok(())
     }
 
-    pub fn run_latest_day(&self) {
+    pub fn run_latest_day(&self) -> RunnerResult<()> {
         if let Some(latest) = self.solutions.last() {
             self.run_day(latest.year(), latest.day())
         } else {
             self.reporter.report_no_solutions();
+            Ok(())
         }
     }
 
-    pub fn run_all(&self) {
+    pub fn run_all(&self) -> RunnerResult<()> {
         if self.solutions.is_empty() {
             self.reporter.report_no_solutions();
+            Ok(())
         } else {
             self.solutions
                 .iter()
                 .map(|s| (s.year(), s.day()))
                 .unique()
-                .for_each(|(year, day)| self.run_day(year, day));
+                .map(|(year, day)| self.run_day(year, day))
+                .try_collect()
         }
     }
 }

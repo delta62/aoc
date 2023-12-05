@@ -1,4 +1,4 @@
-use aoc_runner::{aoc, PuzzleInput};
+use aoc_runner::{aoc, PuzzleInput, Result};
 use regex::Regex;
 
 #[aoc(year = 2023, day = 3, part = 1)]
@@ -71,7 +71,7 @@ impl Grid {
 }
 
 impl<'a> PuzzleInput<'a> for Grid {
-    fn parse(input: &'a [u8]) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a [u8]) -> Result<Self> {
         let s = <&str as PuzzleInput>::parse(input)?;
 
         let mut numbers = vec![];

@@ -1,4 +1,4 @@
-use aoc_runner::{PuzzleError, PuzzleInput, Result};
+use aoc_runner::{PuzzleInput, Result};
 
 pub struct Lines<'a>(&'a str);
 
@@ -14,7 +14,7 @@ impl<'a> Lines<'a> {
 
 impl<'a> PuzzleInput<'a> for Lines<'a> {
     fn parse(input: &'a [u8]) -> Result<Self> {
-        let s = std::str::from_utf8(input).map_err(|_| PuzzleError::Fail)?;
+        let s = <&str as PuzzleInput>::parse(input)?;
         Ok(Lines::new(s))
     }
 }
@@ -26,7 +26,11 @@ macro_rules! numbers {
             .split_whitespace()
             .map(|x| x.parse::<$type>())
             .try_collect()
-            .map_err(|_| ::aoc_runner::parse_error("Unable to parse whitespace-separated integers"))
+            .map_err(|_| {
+                ::aoc_runner::PuzzleError::ParseError(
+                    "Unable to parse whitespace-separated integers".to_string(),
+                )
+            })
     };
 
     ($expr:expr => $type:ty; $sep:literal) => {
@@ -34,6 +38,10 @@ macro_rules! numbers {
             .split($sep)
             .map(|x| x.parse::<$type>())
             .try_collect()
-            .map_err(|_| ::aoc_runner::parse_error("Unable to parse separated integers"))
+            .map_err(|_| {
+                ::aoc_runner::PuzzleError::ParseError(
+                    "Unable to parse separated integers".to_string(),
+                )
+            })
     };
 }

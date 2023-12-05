@@ -1,4 +1,4 @@
-use aoc_runner::{aoc, parse_error, PuzzleInput, Result};
+use aoc_runner::{aoc, parse_opt, PuzzleInput, Result};
 use std::collections::HashSet;
 
 #[aoc(year = 2023, day = 4, part = 1)]
@@ -36,13 +36,9 @@ impl Ticket {
 impl<'a> PuzzleInput<'a> for Ticket {
     fn parse(input: &'a [u8]) -> Result<Self> {
         let input = <&str as PuzzleInput>::parse(input)?;
-        let (winning, mine) = input
-            .split_once('|')
-            .ok_or(parse_error("input line didn't contain a '|'"))?;
-
-        let (_card_num, winning) = winning
-            .split_once(':')
-            .ok_or(parse_error("input line didn't contain a ':'"))?;
+        let (winning, mine) = parse_opt!(input.split_once('|'), "input didn't contain a |")?;
+        let (_card_num, winning) =
+            parse_opt!(winning.split_once(':'), "input line didn't contain a ':'")?;
 
         let winning = numbers!(winning => usize)?;
         let mine = numbers!(mine => usize)?;
