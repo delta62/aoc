@@ -65,7 +65,6 @@ impl Runner {
 
     fn run_day(&self, year: u16, day: u8) {
         if self.should_fetch_input(year, day) {
-            self.reporter.report_downloading(year, day);
             let out_dir = format!("aoc/input/{year}");
             self.downloader.as_ref().unwrap().fetch(year, day, &out_dir);
         }

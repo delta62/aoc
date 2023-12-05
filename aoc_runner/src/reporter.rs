@@ -14,9 +14,6 @@ pub trait Reporter {
 
     /// Let the user know that there are no solutions which can be run
     fn report_no_solutions(&self);
-
-    /// Let the user know that the runner is downloading puzzle input for them
-    fn report_downloading(&self, year: u16, day: u8);
 }
 
 pub struct DefaultReporter;
@@ -47,9 +44,5 @@ impl Reporter for DefaultReporter {
 
     fn report_no_solutions(&self) {
         eprintln!("No solutions found");
-    }
-
-    fn report_downloading(&self, year: u16, day: u8) {
-        println!("Downloading puzzle input for day {day} {year}");
     }
 }
