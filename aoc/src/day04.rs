@@ -64,7 +64,7 @@ impl TicketStack {
             let match_count = ticket.winning_count();
             let increment_count = ticket_counts[i];
             let start = i + 1;
-            let end = inc_start_index + match_count;
+            let end = start + match_count;
 
             for x in &mut ticket_counts[start..end] {
                 *x += increment_count;
