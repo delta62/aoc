@@ -6,11 +6,7 @@ mod test_helpers;
 #[macro_use]
 mod input;
 mod args;
-
-mod day01;
-mod day02;
-mod day03;
-mod day04;
+mod days;
 
 use aoc_runner::{Runner, RunnerResult};
 use args::Args;
