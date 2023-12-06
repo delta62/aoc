@@ -1,3 +1,11 @@
-[workspace]
-resolver = "2"
-members = ["aoc", "aoc_runner_macros", "aoc_runner", "aoc_runner_core"]
+[package]
+name = "aoc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc_runner = { git = "https://github.com/delta62/aoc_runner.git" }
+clap = { version = "^4.4.11", features = ["derive"] }
+dotenv = "^0.15.0"
+lazy_static = "^1.4.0"
+regex = "^1.10.2"
