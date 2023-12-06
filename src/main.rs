@@ -27,7 +27,7 @@ pub fn main() -> RunnerResult<()> {
 
     let runner = Runner::new()
         .auto_download_with_token(session_token)
-        .with_input_path("aoc/input");
+        .with_input_path("input");
 
     if args.all {
         runner.run_all()?;
