@@ -28,8 +28,7 @@ pub struct Game {
 }
 
 impl<'a> PuzzleInput<'a> for Game {
-    fn parse(input: &'a [u8]) -> Result<Self> {
-        let input = <&str as PuzzleInput>::parse(input)?;
+    fn parse(input: &'a str) -> Result<Self> {
         let (game_id, samples) = parse_opt!(
             input.split_once(':'),
             "No ':' separating game ID from samples"
@@ -137,7 +136,7 @@ mod tests {
     #[test]
     fn example_1() {
         let input = example_str!("2023/d2e1.txt");
-        let input = <Vec<Game>>::parse(input.as_bytes()).unwrap();
+        let input = <Vec<Game>>::parse(&input).unwrap();
         let solution = part1(input);
         assert_eq!(solution, 8);
     }
@@ -145,7 +144,7 @@ mod tests {
     #[test]
     fn example_2() {
         let input = example_str!("2023/d2e1.txt");
-        let input = <Vec<Game>>::parse(input.as_bytes()).unwrap();
+        let input = <Vec<Game>>::parse(&input).unwrap();
         let solution = part2(input);
         assert_eq!(solution, 2286);
     }

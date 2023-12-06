@@ -34,8 +34,7 @@ impl Ticket {
 }
 
 impl<'a> PuzzleInput<'a> for Ticket {
-    fn parse(input: &'a [u8]) -> Result<Self> {
-        let input = <&str as PuzzleInput>::parse(input)?;
+    fn parse(input: &'a str) -> Result<Self> {
         let (winning, mine) = parse_opt!(input.split_once('|'), "input didn't contain a |")?;
         let (_card_num, winning) =
             parse_opt!(winning.split_once(':'), "input line didn't contain a ':'")?;
@@ -71,7 +70,7 @@ impl TicketStack {
 }
 
 impl<'a> PuzzleInput<'a> for TicketStack {
-    fn parse(input: &'a [u8]) -> Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         let tickets = <Vec<Ticket>>::parse(input)?;
 
         Ok(Self { tickets })
@@ -84,7 +83,7 @@ mod tests {
 
     #[test]
     fn example_1() {
-        let input = example_bytes!("2023/d4e1.txt");
+        let input = example_str!("2023/d4e1.txt");
         let input = <Vec<Ticket>>::parse(&input).unwrap();
         let result = part1(input);
         assert_eq!(result, 13);
@@ -92,7 +91,7 @@ mod tests {
 
     #[test]
     fn example_2() {
-        let input = example_bytes!("2023/d4e1.txt");
+        let input = example_str!("2023/d4e1.txt");
         let input = TicketStack::parse(&input).unwrap();
         let result = part2(input);
         assert_eq!(result, 30);

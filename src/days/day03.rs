@@ -71,15 +71,13 @@ impl Grid {
 }
 
 impl<'a> PuzzleInput<'a> for Grid {
-    fn parse(input: &'a [u8]) -> Result<Self> {
-        let s = <&str as PuzzleInput>::parse(input)?;
-
+    fn parse(input: &'a str) -> Result<Self> {
         let mut numbers = vec![];
         let mut symbols = vec![];
 
         let regex = Regex::new(r"(?<num>\d+)|(?<sym>[^.])").unwrap();
 
-        for (y, row) in s.lines().enumerate() {
+        for (y, row) in input.lines().enumerate() {
             let captures = regex.captures_iter(row);
 
             for cap in captures {
@@ -108,7 +106,7 @@ mod tests {
     #[test]
     fn example1() {
         let input = example_str!("2023/d3e1.txt");
-        let input = Grid::parse(input.as_bytes()).unwrap();
+        let input = Grid::parse(&input).unwrap();
         let result = part1(input);
         assert_eq!(result, 4361);
     }
@@ -116,7 +114,7 @@ mod tests {
     #[test]
     fn example2() {
         let input = example_str!("2023/d3e1.txt");
-        let input = Grid::parse(input.as_bytes()).unwrap();
+        let input = Grid::parse(&input).unwrap();
         let result = part2(input);
         assert_eq!(result, 467835);
     }
