@@ -4,8 +4,6 @@ use std::{
     collections::{HashMap, HashSet},
 };
 
-const HAND_SIZE: usize = 5;
-
 #[aoc(year = 2023, day = 7, part = 1)]
 fn part1<'a>(mut input: Vec<Hand>) -> usize {
     input.sort();
@@ -38,11 +36,11 @@ impl Hand {
     }
 
     fn convert_jacks_to_jokers(&mut self) {
-        self.cards.iter_mut().for_each(|card| {
+        for card in &mut self.cards {
             if card == &Card::Jack {
                 *card = Card::Joker;
             }
-        });
+        }
     }
 
     fn score(&self) -> HandScore {
