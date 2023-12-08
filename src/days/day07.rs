@@ -1,5 +1,6 @@
 use aoc_runner::{aoc, parse, parse_opt, PuzzleError, PuzzleInput, Result};
 use std::{
+    cell::Cell,
     cmp::Ordering,
     collections::{HashMap, HashSet},
 };
@@ -28,11 +29,16 @@ fn part2<'a>(mut input: Vec<Hand>) -> usize {
 pub struct Hand {
     bid: usize,
     cards: Vec<Card>,
+
+    // Use Option here so that we can lazily compute the score
+    // Use Cell so that we can cache the computed score across calls
+    score: Cell<Option<HandScore>>,
 }
 
 impl Hand {
     fn new(bid: usize, cards: Vec<Card>) -> Self {
-        Self { bid, cards }
+        let score = Cell::new(None);
+        Self { bid, cards, score }
     }
 
     fn convert_jacks_to_jokers(&mut self) {
@@ -44,6 +50,17 @@ impl Hand {
     }
 
     fn score(&self) -> HandScore {
+        if self.score.get().is_none() {
+            let score = self.compute_score();
+            self.score.set(Some(score));
+        }
+
+        // SAFETY: This was just set in the previous line when it's None, so it
+        // is never possible that this would panic
+        self.score.get().unwrap()
+    }
+
+    fn compute_score(&self) -> HandScore {
         let mut joker_count = 0;
         let groups = self.cards.iter().fold(HashMap::new(), |mut acc, card| {
             if card == &Card::Joker {
@@ -57,8 +74,7 @@ impl Hand {
         });
 
         let mut group_sizes: Vec<_> = groups.values().copied().collect();
-        group_sizes.sort();
-        group_sizes.reverse();
+        group_sizes.sort_by(|a, b| a.cmp(b).reverse());
 
         let largest_group = group_sizes.first().copied().unwrap_or_default() + joker_count;
         let second_largest_group = group_sizes.get(1).copied().unwrap_or_default();
@@ -84,7 +100,7 @@ impl<'a> PuzzleInput<'a> for Hand {
     fn parse(input: &'a str) -> Result<Self> {
         let (cards, bid) = parse_opt!(input.split_once(' '), "expected space-separated input")?;
         let bid = parse!(bid.parse::<usize>())?;
-        let cards = cards.chars().map(Card::try_from).try_collect::<Vec<_>>()?;
+        let cards = cards.chars().map(Card::try_from).try_collect()?;
 
         Ok(Self::new(bid, cards))
     }

@@ -72,7 +72,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_1_works() {
+    fn example_1() {
         let input = example_str!("2023/d1e1.txt");
         let input = Lines::new(&input);
         let result = part1(input);
@@ -80,7 +80,7 @@ mod tests {
     }
 
     #[test]
-    fn example_2_works() {
+    fn example_2() {
         let input = example_str!("2023/d1e2.txt");
         let input = Lines::new(&input);
         let result = part2(input);
