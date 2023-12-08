@@ -1,5 +1,5 @@
 use crate::input::Paragraphs;
-use aoc_runner::{aoc, parse, parse_opt, PuzzleInput};
+use aoc_runner::{aoc, parse, parse_opt, PuzzleInput, Result};
 use std::ops::Range;
 
 #[aoc(year = 2023, day = 5, part = 1)]
@@ -8,12 +8,103 @@ fn part1(input: Almanac) -> usize {
 }
 
 #[aoc(year = 2023, day = 5, part = 2)]
-fn part2(mut input: Almanac) -> usize {
-    input
-        .smallest_soil_numbers_from_ranges()
-        .into_iter()
-        .min()
-        .unwrap()
+fn part2(input: AlmanacV2) -> isize {
+    input.lowest_of_all_seeds()
+}
+
+#[derive(Default)]
+pub struct AlmanacV2 {
+    seed_ranges: Vec<Range<isize>>,
+    stages: Vec<StageV2>,
+}
+
+impl AlmanacV2 {
+    fn lowest_of_all_seeds(&self) -> isize {
+        self.seed_ranges
+            .iter()
+            .cloned()
+            .map(|range| self.lowest_seed_value(range))
+            .min()
+            .unwrap()
+    }
+
+    fn lowest_seed_value(&self, range: Range<isize>) -> isize {
+        todo!()
+    }
+}
+
+impl<'a> PuzzleInput<'a> for AlmanacV2 {
+    fn parse(input: &'a str) -> Result<Self> {
+        let mut blocks = Paragraphs::parse(input)?.iter();
+
+        let seeds_block = parse_opt!(blocks.next(), "Input was empty")?;
+        let seeds = parse_opt!(seeds_block.strip_prefix("seeds: "), "malformed seeds line")?;
+        let seeds: Vec<_> = parse!(seeds
+            .split_whitespace()
+            .map(|x| x.parse::<isize>())
+            .try_collect())?;
+        let seed_ranges = seeds
+            .chunks(2)
+            .map(|chunk| Range {
+                start: chunk[0],
+                end: chunk[1],
+            })
+            .collect();
+
+        let almanac = AlmanacV2 {
+            seed_ranges,
+            ..Default::default()
+        };
+
+        let almanac = blocks.try_fold(almanac, |mut acc, block| {
+            acc.stages.push(StageV2::parse(block)?);
+            Ok(acc)
+        })?;
+
+        Ok(almanac)
+    }
+}
+
+impl<'a> PuzzleInput<'a> for StageV2 {
+    fn parse(input: &'a str) -> Result<Self> {
+        let ranges = input.lines().skip(1).map(AlmanacRange::parse).try_collect();
+        let ranges = parse!(ranges)?;
+
+        Ok(Self { ranges })
+    }
+}
+
+impl<'a> PuzzleInput<'a> for AlmanacRange {
+    fn parse(input: &'a str) -> Result<Self> {
+        let nums: Vec<_> = parse!(input
+            .split_whitespace()
+            .map(|x| x.parse::<isize>())
+            .try_collect())?;
+
+        let mut nums = nums.into_iter();
+        let dest_start = parse_opt!(nums.next(), "Missing destination start")?;
+        let src_start = parse_opt!(nums.next(), "Missing source start")?;
+        let len = parse_opt!(nums.next(), "Missing range length")?;
+        let dest_offset = dest_start - src_start;
+        let src_range = Range {
+            start: src_start,
+            end: src_start + len,
+        };
+
+        Ok(Self {
+            dest_offset,
+            src_range,
+        })
+    }
+}
+
+pub struct StageV2 {
+    ranges: Vec<AlmanacRange>,
+}
+
+pub struct AlmanacRange {
+    dest_offset: isize,
+    src_range: Range<isize>,
 }
 
 #[derive(Default)]
@@ -91,7 +182,7 @@ impl MappingRange {
 }
 
 impl<'a> PuzzleInput<'a> for Almanac {
-    fn parse(input: &'a str) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         let mut blocks = Paragraphs::parse(input)?.iter();
 
         let seeds_block = parse_opt!(blocks.next(), "Input was empty")?;
@@ -116,7 +207,7 @@ impl<'a> PuzzleInput<'a> for Almanac {
 }
 
 impl<'a> PuzzleInput<'a> for Stage {
-    fn parse(input: &'a str) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         let ranges = input.lines().skip(1).map(MappingRange::parse).try_collect();
         let ranges = parse!(ranges)?;
 
@@ -125,7 +216,7 @@ impl<'a> PuzzleInput<'a> for Stage {
 }
 
 impl<'a> PuzzleInput<'a> for MappingRange {
-    fn parse(input: &'a str) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         let mut line = input.split_whitespace().map(|x| parse!(x.parse::<usize>()));
         let dest_start = parse!(parse_opt!(
             line.next(),
@@ -154,11 +245,11 @@ mod tests {
         assert_eq!(result, 35);
     }
 
-    // #[test]
-    // fn example_2() {
-    //     let input = example_str!("2023/d5e1.txt");
-    //     let input = Almanac::parse(&input).unwrap();
-    //     let result = part2(input);
-    //     assert_eq!(result, 46);
-    // }
+    #[test]
+    fn example_2() {
+        let input = example_str!("2023/d5e1.txt");
+        let input = AlmanacV2::parse(&input).unwrap();
+        let result = part2(input);
+        assert_eq!(result, 46);
+    }
 }
