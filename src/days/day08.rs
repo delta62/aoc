@@ -1,45 +1,97 @@
 use crate::input::Paragraphs;
-use aoc_runner::{aoc, PuzzleError, PuzzleInput};
+use aoc_runner::{aoc, parse_opt, PuzzleError, PuzzleInput, Result};
 use std::collections::HashMap;
 
 #[aoc(year = 2023, day = 8, part = 1)]
 fn part1(input: Puzzle) -> usize {
     let Puzzle { network, moves } = input;
-    network.traverse(moves.into_iter()).count()
+    let moves = moves.into_iter();
+
+    network.traverse(moves)
 }
+
+#[aoc(year = 2023, day = 8, part = 2)]
+fn part2(input: Puzzle) -> usize {
+    let Puzzle { network, moves } = input;
+    let moves = moves.into_iter();
+
+    network.parallel_traverse(moves)
+}
+
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+pub struct NodeId(usize);
 
 #[derive(Debug)]
 pub struct Network {
-    nodes: HashMap<usize, Node>,
-    start: usize,
-    target: usize,
+    nodes: HashMap<NodeId, Node>,
+    start: Option<NodeId>,
+    target: Option<NodeId>,
 }
 
 impl Network {
-    fn traverse<'a>(
-        &'a self,
-        moves: impl Iterator<Item = Direction> + 'a,
-    ) -> impl Iterator<Item = usize> + 'a {
-        let mut current = self.nodes[&self.start];
-        let mut current_id = self.start;
+    fn traverse<'a>(&'a self, moves: impl Iterator<Item = Direction> + 'a) -> usize {
+        let mut current = self.nodes[&self.start.unwrap()];
+        let mut move_count = 0;
 
-        moves
-            .map(move |dir| {
-                let next = match dir {
-                    Direction::Left => current.0,
-                    Direction::Right => current.1,
+        for dir in moves {
+            move_count += 1;
+            let next = match dir {
+                Direction::Left => current.left,
+                Direction::Right => current.right,
+            };
+
+            if next == self.target.unwrap() {
+                return move_count;
+            }
+
+            current = self.nodes[&next];
+        }
+
+        unreachable!()
+    }
+
+    fn parallel_traverse<'a>(&'a self, moves: impl Iterator<Item = Direction> + 'a) -> usize {
+        let mut move_count = 0;
+        let mut current: Vec<_> = self
+            .nodes
+            .values()
+            .filter_map(|n| if n.is_start { Some(n.id) } else { None })
+            .collect();
+
+        for dir in moves {
+            move_count += 1;
+            let mut all_finished = true;
+
+            for current_id in &mut current {
+                let next_id = match dir {
+                    Direction::Left => self.nodes[&current_id].left,
+                    Direction::Right => self.nodes[&current_id].right,
                 };
-                let tmp = current_id;
-                current = self.nodes[&next];
-                current_id = next;
-                tmp
-            })
-            .take_while(|current| *current != self.target)
+
+                if !self.nodes[&next_id].is_end {
+                    all_finished = false;
+                }
+
+                *current_id = next_id;
+            }
+
+            if all_finished {
+                return move_count;
+            }
+        }
+
+        unreachable!()
     }
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct Node(usize, usize);
+pub struct Node {
+    id: NodeId,
+    left: NodeId,
+    right: NodeId,
+    is_start: bool,
+    is_end: bool,
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Direction {
@@ -50,7 +102,7 @@ pub enum Direction {
 impl TryFrom<char> for Direction {
     type Error = PuzzleError;
 
-    fn try_from(value: char) -> Result<Self, Self::Error> {
+    fn try_from(value: char) -> std::result::Result<Self, Self::Error> {
         match value {
             'R' => Ok(Direction::Right),
             'L' => Ok(Direction::Left),
@@ -68,7 +120,7 @@ impl Moves {
 }
 
 impl<'a> PuzzleInput<'a> for Moves {
-    fn parse(input: &'a str) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         Ok(Self(
             input
                 .chars()
@@ -85,19 +137,22 @@ pub struct Puzzle {
 }
 
 impl<'a> PuzzleInput<'a> for Puzzle {
-    fn parse(input: &'a str) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         let input = Paragraphs::parse(input)?;
         let mut input = input.iter();
 
-        let moves = Moves::parse(input.next().unwrap())?;
-        let network = Network::parse(input.next().unwrap())?;
+        let moves = parse_opt!(input.next(), "input didn't include any moves")?;
+        let moves = Moves::parse(moves)?;
+
+        let network = parse_opt!(input.next(), "input didn't include any nodes")?;
+        let network = Network::parse(network)?;
 
         Ok(Self { moves, network })
     }
 }
 
 impl<'a> PuzzleInput<'a> for Network {
-    fn parse(input: &'a str) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         let mut ids = HashMap::new();
         let mut nodes = HashMap::new();
 
@@ -111,19 +166,30 @@ impl<'a> PuzzleInput<'a> for Network {
                 .split_once(", ")
                 .unwrap();
 
-            let id = ids.len();
-            let this_id = *ids.entry(name).or_insert(id);
-            let id = ids.len();
-            let left_id = *ids.entry(left).or_insert(id);
-            let id = ids.len();
-            let rght_id = *ids.entry(rght).or_insert(id);
+            let next_id = ids.len();
+            let id = NodeId(*ids.entry(name).or_insert(next_id));
 
-            let node = Node(left_id, rght_id);
-            nodes.insert(this_id, node);
+            let next_id = ids.len();
+            let left = NodeId(*ids.entry(left).or_insert(next_id));
+
+            let next_id = ids.len();
+            let right = NodeId(*ids.entry(rght).or_insert(next_id));
+
+            let is_start = name.ends_with('A');
+            let is_end = name.ends_with('Z');
+
+            let node = Node {
+                id,
+                left,
+                right,
+                is_start,
+                is_end,
+            };
+            nodes.insert(id, node);
         });
 
-        let start = ids["AAA"];
-        let target = ids["ZZZ"];
+        let start = ids.get("AAA").copied().map(NodeId);
+        let target = ids.get("ZZZ").copied().map(NodeId);
 
         Ok(Self {
             nodes,
@@ -153,10 +219,11 @@ mod tests {
         assert_eq!(result, 6);
     }
 
-    // #[test]
-    // fn example_2() {
-    //     let input = example_str!("2023/d8e1.txt");
-    //     let result = part2(&input);
-    //     assert_eq!(result, 5905);
-    // }
+    #[test]
+    fn example_3() {
+        let input = example_str!("2023/d8e3.txt");
+        let input = Puzzle::parse(&input).unwrap();
+        let result = part2(input);
+        assert_eq!(result, 6);
+    }
 }
