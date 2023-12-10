@@ -6,6 +6,7 @@ mod test_helpers;
 #[macro_use]
 mod input;
 mod days;
+mod geom;
 
 use aoc_runner::{Runner, RunnerResult};
 use clap::{arg, command};

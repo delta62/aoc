@@ -83,20 +83,20 @@ mod tests {
     fn example_1() {
         let input = example_str!("2023/d1e1.txt");
         let result = part1(&input);
-        assert_eq!(result.unwrap(), 142);
+        assert_eq!(result, 142);
     }
 
     #[test]
     fn example_2() {
         let input = example_str!("2023/d1e2.txt");
         let result = part2(&input);
-        assert_eq!(result.unwrap(), 281);
+        assert_eq!(result, 281);
     }
 
     #[test]
     fn part2_overlap() {
         let input = "2oneight";
         let result = part2(&input);
-        assert_eq!(result.unwrap(), 28);
+        assert_eq!(result, 28);
     }
 }

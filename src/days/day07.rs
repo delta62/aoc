@@ -50,28 +50,25 @@ impl Hand {
     }
 
     fn score(&self) -> HandScore {
-        if self.score.get().is_none() {
-            let score = self.compute_score();
-            self.score.set(Some(score));
-        }
-
-        // SAFETY: This was just set in the previous line when it's None, so it
-        // is never possible that this would panic
-        self.score.get().unwrap()
+        *self.score.get().get_or_insert_with(|| self.compute_score())
     }
 
     fn compute_score(&self) -> HandScore {
         let mut joker_count = 0;
-        let groups = self.cards.iter().fold(HashMap::new(), |mut acc, card| {
-            if card == &Card::Joker {
-                joker_count += 1;
-            } else {
-                let entry: &mut usize = acc.entry(card).or_default();
-                *entry += 1;
-            }
+        let groups = self
+            .cards
+            .iter()
+            .copied()
+            .fold(HashMap::new(), |mut acc, card| {
+                if card == Card::Joker {
+                    joker_count += 1;
+                } else {
+                    let entry: &mut usize = acc.entry(card).or_default();
+                    *entry += 1;
+                }
 
-            acc
-        });
+                acc
+            });
 
         let mut group_sizes: Vec<_> = groups.values().copied().collect();
         group_sizes.sort_by(|a, b| a.cmp(b).reverse());
