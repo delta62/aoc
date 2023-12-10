@@ -1,25 +1,5 @@
 use aoc_runner::{PuzzleInput, Result};
 
-/// An iterator over a newline-separated string. Each iteration will
-/// yield a line of text until the end of the string is reached.
-pub struct Lines<'a>(&'a str);
-
-impl<'a> Lines<'a> {
-    pub fn new(s: &'a str) -> Self {
-        Self(s)
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &'a str> {
-        self.0.lines()
-    }
-}
-
-impl<'a> PuzzleInput<'a> for Lines<'a> {
-    fn parse(input: &'a str) -> Result<Self> {
-        Ok(Lines::new(input))
-    }
-}
-
 /// An iterator of paragraphs of text. Each paragraph is denoted by
 /// an empty line. The empty lines separating the paragraphs are omitted
 /// from the iterator's output.

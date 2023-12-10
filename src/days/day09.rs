@@ -22,11 +22,10 @@ impl History {
             let last_seq = sequences.last().unwrap();
             let mut all_zero = true;
             let (first, rest) = last_seq.split_first().unwrap();
-            let mut first = *first;
             let new = rest
                 .iter()
                 .copied()
-                .scan(first, |last, x| {
+                .scan(*first, |last, x| {
                     let diff = x - *last;
                     if diff != 0 {
                         all_zero = false;
@@ -57,11 +56,10 @@ impl History {
             let last_seq = sequences.last().unwrap();
             let mut all_zero = true;
             let (first, rest) = last_seq.split_first().unwrap();
-            let mut first = *first;
-            let mut new: Vec<_> = rest
+            let new: Vec<_> = rest
                 .iter()
                 .copied()
-                .scan(first, |last, x| {
+                .scan(*first, |last, x| {
                     let diff = x - *last;
                     if diff != 0 {
                         all_zero = false;
@@ -92,6 +90,7 @@ impl<'a> PuzzleInput<'a> for History {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

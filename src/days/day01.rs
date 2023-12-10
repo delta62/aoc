@@ -9,19 +9,21 @@ lazy_static! {
 }
 
 #[aoc(year = 2023, day = 1, part = 1)]
-fn part1<'a>(input: &'a str) -> Result<u32> {
+fn part1<'a>(input: &'a str) -> u32 {
     input
         .lines()
         .map(line_sum)
         .try_fold(0, |acc, n| n.map(|n| acc + n))
+        .unwrap()
 }
 
 #[aoc(year = 2023, day = 1, part = 2)]
-fn part2<'a>(input: &'a str) -> Result<u32> {
+fn part2<'a>(input: &'a str) -> u32 {
     input
         .lines()
         .map(spelling_sum)
         .try_fold(0, |acc, n| n.map(|n| acc + n))
+        .unwrap()
 }
 
 fn line_sum(line: &str) -> Result<u32> {
