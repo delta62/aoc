@@ -6,7 +6,7 @@ use std::{
 };
 
 #[aoc(year = 2023, day = 7, part = 1)]
-fn part1<'a>(mut input: Vec<Hand>) -> usize {
+fn part1(mut input: Vec<Hand>) -> usize {
     input.sort();
 
     input
@@ -17,7 +17,7 @@ fn part1<'a>(mut input: Vec<Hand>) -> usize {
 }
 
 #[aoc(year = 2023, day = 7, part = 2)]
-fn part2<'a>(mut input: Vec<Hand>) -> usize {
+fn part2(mut input: Vec<Hand>) -> usize {
     input
         .iter_mut()
         .for_each(|hand| hand.convert_jacks_to_jokers());
@@ -25,7 +25,7 @@ fn part2<'a>(mut input: Vec<Hand>) -> usize {
     part1(input)
 }
 
-#[derive(Debug, Eq, Ord)]
+#[derive(Debug, Eq)]
 pub struct Hand {
     bid: usize,
     cards: Vec<Card>,
@@ -114,11 +114,15 @@ impl PartialEq for Hand {
 
 impl PartialOrd for Hand {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(
-            self.score()
-                .cmp(&other.score())
-                .then(self.cards.cmp(&other.cards)),
-        )
+        Some(std::cmp::Ord::cmp(self, other))
+    }
+}
+
+impl Ord for Hand {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.score()
+            .cmp(&other.score())
+            .then(self.cards.cmp(&other.cards))
     }
 }
 
