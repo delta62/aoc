@@ -1,182 +1,168 @@
 use crate::input::Paragraphs;
 use aoc_runner::{aoc, parse, parse_opt, PuzzleInput, Result};
+use std::{cmp, ops::Range};
 
 #[aoc(year = 2023, day = 5, part = 1)]
-fn part1(input: Almanac) -> usize {
-    input.soil_numbers().min().unwrap()
+fn part1(input: Almanac) -> i64 {
+    input.min_location_value()
 }
 
-// #[aoc(year = 2023, day = 5, part = 2)]
-// fn part2(input: AlmanacV2) -> isize {
-//     input.lowest_of_all_seeds()
-// }
+#[aoc(year = 2023, day = 5, part = 2)]
+fn part2(mut input: Almanac) -> i64 {
+    input.seeds_to_ranges();
+    input.min_location_value()
+}
 
-// #[derive(Default)]
-// pub struct AlmanacV2 {
-//     seed_ranges: Vec<Range<isize>>,
-//     stages: Vec<StageV2>,
-// }
-
-// impl AlmanacV2 {
-//     fn lowest_of_all_seeds(&self) -> isize {
-//         self.seed_ranges
-//             .iter()
-//             .cloned()
-//             .map(|range| self.lowest_seed_value(range))
-//             .min()
-//             .unwrap()
-//     }
-
-//     fn lowest_seed_value(&self, range: Range<isize>) -> isize {
-//         todo!()
-//     }
-// }
-
-// impl<'a> PuzzleInput<'a> for AlmanacV2 {
-//     fn parse(input: &'a str) -> Result<Self> {
-//         let mut blocks = Paragraphs::parse(input)?.iter();
-
-//         let seeds_block = parse_opt!(blocks.next(), "Input was empty")?;
-//         let seeds = parse_opt!(seeds_block.strip_prefix("seeds: "), "malformed seeds line")?;
-//         let seeds: Vec<_> = parse!(seeds
-//             .split_whitespace()
-//             .map(|x| x.parse::<isize>())
-//             .try_collect())?;
-//         let seed_ranges = seeds
-//             .chunks(2)
-//             .map(|chunk| Range {
-//                 start: chunk[0],
-//                 end: chunk[1],
-//             })
-//             .collect();
-
-//         let almanac = AlmanacV2 {
-//             seed_ranges,
-//             ..Default::default()
-//         };
-
-//         let almanac = blocks.try_fold(almanac, |mut acc, block| {
-//             acc.stages.push(StageV2::parse(block)?);
-//             Ok(acc)
-//         })?;
-
-//         Ok(almanac)
-//     }
-// }
-
-// impl<'a> PuzzleInput<'a> for StageV2 {
-//     fn parse(input: &'a str) -> Result<Self> {
-//         let ranges = input.lines().skip(1).map(AlmanacRange::parse).try_collect();
-//         let ranges = parse!(ranges)?;
-
-//         Ok(Self { ranges })
-//     }
-// }
-
-// impl<'a> PuzzleInput<'a> for AlmanacRange {
-//     fn parse(input: &'a str) -> Result<Self> {
-//         let nums: Vec<_> = parse!(input
-//             .split_whitespace()
-//             .map(|x| x.parse::<isize>())
-//             .try_collect())?;
-
-//         let mut nums = nums.into_iter();
-//         let dest_start = parse_opt!(nums.next(), "Missing destination start")?;
-//         let src_start = parse_opt!(nums.next(), "Missing source start")?;
-//         let len = parse_opt!(nums.next(), "Missing range length")?;
-//         let dest_offset = dest_start - src_start;
-//         let src_range = Range {
-//             start: src_start,
-//             end: src_start + len,
-//         };
-
-//         Ok(Self {
-//             dest_offset,
-//             src_range,
-//         })
-//     }
-// }
-
-// pub struct StageV2 {
-//     ranges: Vec<AlmanacRange>,
-// }
-
-// pub struct AlmanacRange {
-//     dest_offset: isize,
-//     src_range: Range<isize>,
-// }
-
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Almanac {
-    seeds: Vec<usize>,
+    seeds: Vec<Range<i64>>,
     stages: Vec<Stage>,
 }
 
 impl Almanac {
-    fn soil_numbers(&self) -> impl Iterator<Item = usize> + '_ {
-        self.seeds
-            .iter()
-            .copied()
-            .map(|seed| self.find_soil_value(seed))
+    fn seeds_to_ranges(&mut self) {
+        self.seeds = self
+            .seeds
+            .chunks(2)
+            .map(|chunk| {
+                let start = chunk[0].start;
+                let end = start + chunk[1].start;
+
+                Range { start, end }
+            })
+            .collect();
     }
 
-    // fn smallest_soil_numbers_from_ranges(&mut self) -> Vec<usize> {
-    //     let seed_ranges: Vec<_> = self
-    //         .seeds
-    //         .as_slice()
-    //         .chunks(2)
-    //         .map(|chunk| {
-    //             let start = chunk[0];
-    //             let end = start + chunk[1];
-    //             Range { start, end }
-    //         })
-    //         .collect();
+    fn min_location_value(mut self) -> i64 {
+        self.stages.reverse();
+        let (output_stage, stages) = self.stages.split_first().unwrap();
 
-    //     seed_ranges
-    //         .into_iter()
-    //         .map(|range| self.smallest_soil_for_range(range))
-    //         .collect()
-    // }
-
-    // fn smallest_soil_for_range(&mut self, range: Range<usize>) -> usize {
-    //     todo!()
-    // }
-
-    fn find_soil_value(&self, seed: usize) -> usize {
-        self.stages
+        output_stage
+            .mappings
             .iter()
-            .fold(seed, |seed, stage| stage.almanac_map(seed))
+            .filter_map(|range| find_input_for_output_range(&stages, range))
+            .find_map(|range| {
+                self.seeds.iter().find_map(|seed_range| {
+                    if seed_range.start < range.end && seed_range.start >= range.start {
+                        Some(seed_range.start - range.start)
+                    } else {
+                        None
+                    }
+                })
+            })
+            .unwrap()
     }
 }
 
+fn find_input_for_output_range(stages: &[Stage], output_range: &Mapping) -> Option<Range<i64>> {
+    let (this_stage, rest_stages) = stages.split_first()?;
+    let mut mappings = this_stage.find_mappings_to_fulfill(output_range);
+
+    if rest_stages.is_empty() {
+        mappings.next().map(|range| range.src)
+    } else {
+        mappings.find_map(|range| find_input_for_output_range(rest_stages, &range))
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Stage {
-    ranges: Vec<MappingRange>,
+    /// The mappings that are defined for this stage. Always stored in order
+    /// of their outputs, and outputs are guaranteed to be defined from 0..i64::MAX.
+    mappings: Vec<Mapping>,
 }
 
 impl Stage {
-    fn almanac_map(&self, input: usize) -> usize {
-        self.ranges
+    fn new(mut sparse_ranges: Vec<Mapping>) -> Self {
+        sparse_ranges.sort_by(|a, b| a.dest.start.cmp(&b.dest.start));
+
+        let mut last_range_end = 0;
+        let mut mappings = Vec::new();
+
+        for range in sparse_ranges {
+            if range.dest.start > last_range_end {
+                let range = Range {
+                    start: last_range_end,
+                    end: range.dest.start,
+                };
+
+                mappings.push(Mapping {
+                    src: range.clone(),
+                    dest: range,
+                });
+            }
+
+            last_range_end = range.dest.end;
+            mappings.push(range);
+        }
+
+        if last_range_end < i64::MAX {
+            let range = Range {
+                start: last_range_end,
+                end: i64::MAX,
+            };
+
+            mappings.push(Mapping {
+                src: range.clone(),
+                dest: range,
+            });
+        }
+
+        Self { mappings }
+    }
+
+    fn find_mappings_to_fulfill<'a>(
+        &'a self,
+        range: &'a Mapping,
+    ) -> impl Iterator<Item = Mapping> + '_ {
+        self.mappings
+            .iter()
+            .filter_map(|r| r.range_to_satisfy_input(range))
+    }
+
+    fn almanac_map(&self, input: i64) -> i64 {
+        self.mappings
             .iter()
             .find_map(|range| range.almanac_map(input))
             .unwrap_or(input)
     }
 }
 
-pub struct MappingRange {
-    dest_start: usize,
-    src_start: usize,
-    len: usize,
+#[derive(Clone, Debug)]
+pub struct Mapping {
+    src: Range<i64>,
+    dest: Range<i64>,
 }
 
-impl MappingRange {
-    fn almanac_map(&self, input: usize) -> Option<usize> {
-        if input < self.src_start || input >= self.src_start + self.len {
-            None
-        } else {
-            let offset = input - self.src_start;
-            let dest = self.dest_start + offset;
+impl Mapping {
+    fn almanac_map(&self, input: i64) -> Option<i64> {
+        if self.src.contains(&input) {
+            let offset = input - self.src.start;
+            let dest = self.dest.start + offset;
             Some(dest)
+        } else {
+            None
         }
+    }
+
+    fn range_to_satisfy_input(&self, downstream: &Self) -> Option<Self> {
+        if downstream.src.end < self.dest.start || downstream.src.start >= self.dest.end {
+            return None;
+        }
+
+        let offset = downstream.src.start - self.dest.start;
+
+        let src = Range {
+            start: cmp::max(self.src.start, self.src.start.saturating_add(offset)),
+            end: cmp::min(self.src.end, self.src.end.saturating_add(offset)),
+        };
+
+        let dest = Range {
+            start: cmp::max(self.dest.start, self.dest.start.saturating_add(offset)),
+            end: cmp::min(self.dest.end, self.dest.end.saturating_add(offset)),
+        };
+
+        Some(Self { src, dest })
     }
 }
 
@@ -188,7 +174,7 @@ impl<'a> PuzzleInput<'a> for Almanac {
         let seeds = parse_opt!(seeds_block.strip_prefix("seeds: "), "malformed seeds line")?;
         let seeds = parse!(seeds
             .split_whitespace()
-            .map(|x| x.parse::<usize>())
+            .map(|x| x.parse::<i64>().map(|x| Range { start: x, end: x }))
             .try_collect())?;
 
         let almanac = Almanac {
@@ -196,7 +182,7 @@ impl<'a> PuzzleInput<'a> for Almanac {
             ..Default::default()
         };
 
-        let almanac = blocks.try_fold(almanac, |mut acc, block| {
+        let mut almanac = blocks.try_fold(almanac, |mut acc, block| {
             acc.stages.push(Stage::parse(block)?);
             Ok(acc)
         })?;
@@ -207,16 +193,16 @@ impl<'a> PuzzleInput<'a> for Almanac {
 
 impl<'a> PuzzleInput<'a> for Stage {
     fn parse(input: &'a str) -> Result<Self> {
-        let ranges = input.lines().skip(1).map(MappingRange::parse).try_collect();
-        let ranges = parse!(ranges)?;
+        let mappings = input.lines().skip(1).map(Mapping::parse).try_collect();
+        let mappings = parse!(mappings)?;
 
-        Ok(Self { ranges })
+        Ok(Self::new(mappings))
     }
 }
 
-impl<'a> PuzzleInput<'a> for MappingRange {
+impl<'a> PuzzleInput<'a> for Mapping {
     fn parse(input: &'a str) -> Result<Self> {
-        let mut line = input.split_whitespace().map(|x| parse!(x.parse::<usize>()));
+        let mut line = input.split_whitespace().map(|x| parse!(x.parse::<i64>()));
         let dest_start = parse!(parse_opt!(
             line.next(),
             "destination start missing in input"
@@ -224,11 +210,16 @@ impl<'a> PuzzleInput<'a> for MappingRange {
         let src_start = parse_opt!(line.next(), "source start missing in input")??;
         let len = parse_opt!(line.next(), "length missing in input")??;
 
-        Ok(Self {
-            dest_start,
-            src_start,
-            len,
-        })
+        let src = Range {
+            start: src_start,
+            end: src_start + len,
+        };
+        let dest = Range {
+            start: dest_start,
+            end: dest_start + len,
+        };
+
+        Ok(Self { src, dest })
     }
 }
 
@@ -244,11 +235,11 @@ mod tests {
         assert_eq!(result, 35);
     }
 
-    // #[test]
-    // fn example_2() {
-    //     let input = example_str!("2023/d5e1.txt");
-    //     let input = AlmanacV2::parse(&input).unwrap();
-    //     let result = part2(input);
-    //     assert_eq!(result, 46);
-    // }
+    #[test]
+    fn example_2() {
+        let input = example_str!("2023/d5e1.txt");
+        let input = Almanac::parse(&input).unwrap();
+        let result = part2(input);
+        assert_eq!(result, 46);
+    }
 }

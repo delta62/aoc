@@ -8,8 +8,8 @@ fn part1(input: Grid) -> usize {
 }
 
 pub struct Grid {
-    start: Point,
-    pipes: HashMap<Point, Pipe>,
+    start: Point<i64>,
+    pipes: HashMap<Point<i64>, Pipe>,
 }
 
 impl Grid {
@@ -36,7 +36,11 @@ impl Grid {
         }
     }
 
-    fn next_point(&self, point: Point, direction: Direction) -> Option<(Point, Direction)> {
+    fn next_point(
+        &self,
+        point: Point<i64>,
+        direction: Direction,
+    ) -> Option<(Point<i64>, Direction)> {
         let next_point = point.towards(direction);
 
         if next_point == self.start {
