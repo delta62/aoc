@@ -1,11 +1,18 @@
+use crate::input::Paragraphs;
 use aoc_runner::{aoc, PuzzleInput};
 use itertools::Itertools;
-
-use crate::input::Paragraphs;
+use std::iter;
 
 #[aoc(year = 2023, day = 13, part = 1)]
 fn part1(input: Patterns) -> usize {
-    42
+    input
+        .patterns
+        .into_iter()
+        .map(|pat| {
+            pat.find_horizontal_mirror_col()
+                .unwrap_or_else(|| pat.find_vertical_mirror_row().unwrap() * 100)
+        })
+        .sum()
 }
 
 pub struct Patterns {
@@ -19,11 +26,11 @@ pub struct Pattern {
 
 impl Pattern {
     fn find_horizontal_mirror_col(&self) -> Option<usize> {
-        None
+        find_mirror(&self.cols)
     }
 
     fn find_vertical_mirror_row(&self) -> Option<usize> {
-        None
+        find_mirror(&self.rows)
     }
 }
 
@@ -52,14 +59,21 @@ impl<'a> PuzzleInput<'a> for Pattern {
 }
 
 fn hash(input: impl DoubleEndedIterator<Item = char>) -> usize {
-    input.rev().enumerate().fold(0, |acc, (i, c)| {
-        let val = match c {
-            '#' => 1,
-            '.' => 0,
-            _ => unimplemented!(),
-        };
+    input.rev().enumerate().fold(0, |acc, (i, c)| match c {
+        '#' => acc + (1 << i),
+        '.' => acc,
+        _ => unimplemented!(),
+    })
+}
 
-        acc + (val << i)
+fn find_mirror(values: &[usize]) -> Option<usize> {
+    fn all_equal(a: impl Iterator<Item = usize>, b: impl Iterator<Item = usize>) -> bool {
+        iter::zip(a, b).all(|(a, b)| a == b)
+    }
+
+    (1..values.len()).find(|&i| {
+        let (lft, rgt) = values.split_at(i);
+        all_equal(lft.iter().copied().rev(), rgt.iter().copied())
     })
 }
 
