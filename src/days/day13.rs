@@ -1,5 +1,5 @@
 use crate::input::Paragraphs;
-use aoc_runner::{aoc, PuzzleInput};
+use aoc_runner::{aoc, PuzzleInput, Result};
 use itertools::Itertools;
 use std::iter;
 
@@ -35,7 +35,7 @@ impl Pattern {
 }
 
 impl<'a> PuzzleInput<'a> for Patterns {
-    fn parse(input: &'a str) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         let patterns = Paragraphs::parse(input)?
             .iter()
             .map(Pattern::parse)
@@ -46,7 +46,7 @@ impl<'a> PuzzleInput<'a> for Patterns {
 }
 
 impl<'a> PuzzleInput<'a> for Pattern {
-    fn parse(input: &'a str) -> aoc_runner::Result<Self> {
+    fn parse(input: &'a str) -> Result<Self> {
         let rows = input.lines().map(|line| line.chars()).map(hash).collect();
         let cols = transpose(input)
             .iter()
@@ -66,14 +66,17 @@ fn hash(input: impl DoubleEndedIterator<Item = char>) -> usize {
     })
 }
 
-fn find_mirror(values: &[usize]) -> Option<usize> {
-    fn all_equal(a: impl Iterator<Item = usize>, b: impl Iterator<Item = usize>) -> bool {
+fn find_mirror<'a, T: Eq>(values: &'a [T]) -> Option<usize> {
+    fn all_equal<'b, T: Eq + 'b>(
+        a: impl Iterator<Item = &'b T>,
+        b: impl Iterator<Item = &'b T>,
+    ) -> bool {
         iter::zip(a, b).all(|(a, b)| a == b)
     }
 
     (1..values.len()).find(|&i| {
         let (lft, rgt) = values.split_at(i);
-        all_equal(lft.iter().copied().rev(), rgt.iter().copied())
+        all_equal(lft.iter().rev(), rgt.iter())
     })
 }
 
