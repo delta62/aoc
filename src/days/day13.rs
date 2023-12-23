@@ -1,4 +1,4 @@
-use crate::input::Paragraphs;
+use crate::{input::Paragraphs, util::transpose};
 use aoc_runner::{aoc, PuzzleInput, Result};
 use itertools::Itertools;
 use std::iter;
@@ -8,10 +8,7 @@ fn part1(input: Patterns) -> usize {
     input
         .patterns
         .into_iter()
-        .map(|pat| {
-            pat.find_horizontal_mirror_col(0)
-                .unwrap_or_else(|| pat.find_vertical_mirror_row(0).unwrap() * 100)
-        })
+        .map(|pat| pat.find_mirror_value(0))
         .sum()
 }
 
@@ -37,6 +34,11 @@ pub struct Pattern {
 }
 
 impl Pattern {
+    fn find_mirror_value(&self, delta: usize) -> usize {
+        self.find_horizontal_mirror_col(delta)
+            .unwrap_or_else(|| self.find_vertical_mirror_row(delta).unwrap() * 100)
+    }
+
     fn find_horizontal_mirror_col(&self, delta: usize) -> Option<usize> {
         find_mirror_with_delta(&self.cols, delta)
     }
@@ -60,10 +62,9 @@ impl<'a> PuzzleInput<'a> for Patterns {
 impl<'a> PuzzleInput<'a> for Pattern {
     fn parse(input: &'a str) -> Result<Self> {
         let rows = input.lines().map(|line| line.chars()).map(hash).collect();
-        let cols = transpose(input)
-            .iter()
-            .map(|col| col.chars())
-            .map(hash)
+        let cols = transpose(input.lines(), |line| line.chars())
+            .into_iter()
+            .map(|chars| hash(chars.into_iter()))
             .collect();
 
         Ok(Self { cols, rows })
@@ -82,30 +83,18 @@ fn find_mirror_with_delta(values: &[usize], delta: usize) -> Option<usize> {
     fn find_delta(a: impl Iterator<Item = usize>, b: impl Iterator<Item = usize>) -> usize {
         iter::zip(a, b)
             .map(|(a, b)| (a ^ b).count_ones())
-            .sum::<u32>() as usize
+            .sum::<u32>()
+            .try_into()
+            .unwrap()
     }
 
     (1..values.len()).find(|&i| {
         let (lft, rgt) = values.split_at(i);
-        find_delta(lft.iter().copied().rev(), rgt.iter().copied()) == delta
+        let lft = lft.iter().copied().rev();
+        let rgt = rgt.iter().copied();
+
+        find_delta(lft, rgt) == delta
     })
-}
-
-fn transpose(input: &str) -> Vec<String> {
-    let col_length = input
-        .lines()
-        .next()
-        .map(|line| line.len())
-        .unwrap_or_default();
-    let accumulator = vec![String::new(); col_length];
-
-    input
-        .lines()
-        .into_iter()
-        .fold(accumulator, |mut acc, line| {
-            line.chars().enumerate().for_each(|(i, c)| acc[i].push(c));
-            acc
-        })
 }
 
 #[cfg(test)]
