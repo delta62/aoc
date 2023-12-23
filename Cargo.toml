@@ -7,5 +7,6 @@ edition = "2021"
 aoc_runner = { git = "https://github.com/delta62/aoc_runner.git" }
 clap = { version = "^4.4.11", features = ["cargo"] }
 dotenv = "^0.15.0"
+itertools = "0.12.0"
 lazy_static = "^1.4.0"
 regex = "^1.10.2"
