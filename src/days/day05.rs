@@ -1,5 +1,6 @@
 use crate::input::Paragraphs;
 use aoc_runner::{aoc, parse, parse_opt, PuzzleInput, Result};
+use itertools::Itertools;
 use std::{cmp, ops::Range};
 
 #[aoc(year = 2023, day = 5, part = 1)]

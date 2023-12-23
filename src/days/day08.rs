@@ -1,5 +1,6 @@
 use crate::input::Paragraphs;
 use aoc_runner::{aoc, parse_opt, PuzzleError, PuzzleInput, Result};
+use itertools::Itertools;
 use std::collections::HashMap;
 
 #[aoc(year = 2023, day = 8, part = 1)]
@@ -124,8 +125,8 @@ impl<'a> PuzzleInput<'a> for Moves {
         Ok(Self(
             input
                 .chars()
-                .map(TryFrom::try_from)
-                .try_collect::<Vec<_>>()?
+                .map(Direction::try_from)
+                .try_collect::<Direction, Vec<_>, PuzzleError>()?
                 .into_iter(),
         ))
     }

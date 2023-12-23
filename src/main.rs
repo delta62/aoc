@@ -1,5 +1,3 @@
-#![feature(iterator_try_collect)]
-
 #[cfg(test)]
 #[macro_use]
 mod test_helpers;

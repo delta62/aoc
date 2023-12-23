@@ -1,4 +1,5 @@
 use aoc_runner::{aoc, parse, parse_opt, PuzzleInput};
+use itertools::Itertools;
 
 #[aoc(year = 2023, day = 6, part = 1)]
 fn part1(input: Races) -> usize {

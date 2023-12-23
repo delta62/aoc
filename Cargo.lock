@@ -80,7 +80,7 @@ dependencies = [
 [[package]]
 name = "aoc_runner"
 version = "0.1.0"
-source = "git+https://github.com/delta62/aoc_runner.git#b3b1b4df3ebd3403cc3cefa4e912eaafddf1f776"
+source = "git+https://github.com/delta62/aoc_runner.git#1bf521c95becb0c99ef4d0f1321a0903ebc61d95"
 dependencies = [
  "aoc_runner_core",
  "aoc_runner_macros",
@@ -91,7 +91,7 @@ dependencies = [
 [[package]]
 name = "aoc_runner_core"
 version = "0.1.0"
-source = "git+https://github.com/delta62/aoc_runner.git#b3b1b4df3ebd3403cc3cefa4e912eaafddf1f776"
+source = "git+https://github.com/delta62/aoc_runner.git#1bf521c95becb0c99ef4d0f1321a0903ebc61d95"
 dependencies = [
  "inventory",
 ]
@@ -99,7 +99,7 @@ dependencies = [
 [[package]]
 name = "aoc_runner_macros"
 version = "0.1.0"
-source = "git+https://github.com/delta62/aoc_runner.git#b3b1b4df3ebd3403cc3cefa4e912eaafddf1f776"
+source = "git+https://github.com/delta62/aoc_runner.git#1bf521c95becb0c99ef4d0f1321a0903ebc61d95"
 dependencies = [
  "aoc_runner_core",
  "proc-macro2",

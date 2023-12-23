@@ -23,7 +23,9 @@ impl<'a> PuzzleInput<'a> for Paragraphs<'a> {
 
 /// Parse several numbers separated by whitespace or the given separator
 macro_rules! numbers {
-    ($expr:expr => $type:ty) => {
+    ($expr:expr => $type:ty) => {{
+        use ::itertools::Itertools;
+
         $expr
             .split_whitespace()
             .map(|x| x.parse::<$type>())
@@ -33,9 +35,11 @@ macro_rules! numbers {
                     "Unable to parse whitespace-separated integers".to_string(),
                 )
             })
-    };
+    }};
 
-    ($expr:expr => $type:ty; $sep:literal) => {
+    ($expr:expr => $type:ty; $sep:literal) => {{
+        use ::itertools::Itertools;
+
         $expr
             .split($sep)
             .map(|x| x.parse::<$type>())
@@ -45,7 +49,7 @@ macro_rules! numbers {
                     "Unable to parse separated integers".to_string(),
                 )
             })
-    };
+    }};
 }
 
 #[cfg(test)]
