@@ -35,7 +35,7 @@ executable runner
 
 test-suite test
     import:           shared
-    build-depends:    HUnit ^>=1.6.2.0
+    build-depends:    HUnit ^>=1.6.2.0, containers ^>=0.7
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     hs-source-dirs:   test

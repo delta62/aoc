@@ -2,26 +2,40 @@ module Main where
 
 import Test.HUnit
 import qualified System.Exit as Exit
-import Day01 (part1, part2)
+import qualified Data.Map as M
+import Text.Printf (printf)
+import Day01 (parse, parse', part1, part2)
 
-input :: String
-input = unlines [
-    "3   4",
-    "4   3",
-    "2   5",
-    "1   3",
-    "3   9",
-    "3   3"
-    ]
+readExample :: String -> IO String
+readExample s = readFile $ printf "examples/%s.txt" s
 
-test1 :: Test
-test1 = TestCase (assertEqual "for part 1" 11 (part1 input))
+day1Test :: (String -> Assertion) -> Test
+day1Test f = TestCase $ readExample "day01" >>= f
 
-test2 :: Test
-test2 = TestCase (assertEqual "for part 2" 31 (part2 input))
+parseTest :: String -> Assertion
+parseTest input = assertEqual "parses into two lists" expected actual
+  where
+    list1 = [3, 4, 2, 1, 3, 3]
+    list2 = [4, 3, 5, 3, 9, 3]
+    expected = (list1, list2)
+    actual = parse input
+
+parse'Test :: String -> Assertion
+parse'Test input = assertEqual "parses into a set and a list" expected actual
+  where
+    keys = [3, 4, 2, 1, 3, 3]
+    hash = M.fromList [(3, 3), (4, 1), (5, 1), (9, 1)]
+    expected = (keys, hash)
+    actual = parse' input
+
+part1Test :: String -> Assertion
+part1Test input = assertEqual "for part 1" 11 (part1 input)
+
+part2Test :: String -> Assertion
+part2Test input = assertEqual "for part 2" 31 (part2 input)
 
 tests :: Test
-tests = TestLabel "Day 1" $ TestList [test1, test2]
+tests = TestLabel "Day 1" $ TestList $ map day1Test [parseTest, parse'Test, part1Test, part2Test]
 
 main :: IO ()
 main = do

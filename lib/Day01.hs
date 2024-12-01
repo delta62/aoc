@@ -1,8 +1,11 @@
-module Day01 (part1, part2) where
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+
+module Day01 (parse, parse', part1, part2) where
 
 import Data.List (sort)
-import qualified Data.Set as S
 import qualified Data.Map as M
+
+type Lookup = M.Map Int Int
 
 parseStr :: String -> Int
 parseStr = read
@@ -21,30 +24,29 @@ counts xs = foldr (\x acc -> M.insertWith inc x 1 acc) M.empty xs
   where
     inc _ x = succ x
 
-parse' :: String -> (S.Set Int, M.Map Int Int)
+parse' :: String -> ([Int], Lookup)
 parse' s = (set, hash)
   where
     bits = unzip $ map parseLine (lines s)
-    set = S.fromList (fst bits)
+    set = fst bits
     hash = counts (snd bits)
 
-minDiffs :: ([Int], [Int]) -> Int
-minDiffs (xs, ys) = sum $ map (\(x, y) -> abs (x - y)) $ zip as bs
+diffs :: ([Int], [Int]) -> Int
+diffs (xs, ys) = sum $ map tupleDiff $ zip as bs
   where
     as = sort xs
     bs = sort ys
+    tupleDiff (x, y) = abs $ x - y
 
-scores :: M.Map Int Int -> Int
-scores m = M.foldrWithKey folder 0 m
+scores :: [Int] -> Lookup -> Int
+scores ks m = sum $ map score ks
   where
-    folder k v acc = acc + k * v
+    score k = k * (M.findWithDefault 0 k m)
 
 part1 :: String -> Int
-part1 input = minDiffs $ parse input
+part1 input = diffs $ parse input
 
 part2 :: String -> Int
-part2 input = scores parsed'
-  where
-    parsed = parse' input
-    keys = fst parsed
-    parsed' = M.restrictKeys (snd parsed) keys
+part2 input =
+    let (keys, entries) = parse' input
+     in scores keys entries
