@@ -17,31 +17,29 @@ parseLine :: String -> (Int, Int)
 parseLine s = tuple $ map parseStr $ words s
 
 parse :: String -> ([Int], [Int])
-parse s = unzip $ map parseLine (lines s)
+parse s = unzip $ map parseLine $ lines s
 
 counts :: (Num a, Ord a, Enum a) => [a] -> M.Map a a
-counts xs = foldr (\x acc -> M.insertWith inc x 1 acc) M.empty xs
+counts xs = foldr folder M.empty xs
   where
     inc _ x = succ x
+    folder x acc = M.insertWith inc x 1 acc
 
 parse' :: String -> ([Int], Lookup)
 parse' s = (set, hash)
   where
-    bits = unzip $ map parseLine (lines s)
-    set = fst bits
-    hash = counts (snd bits)
+    (set, h) = unzip $ map parseLine $ lines s
+    hash = counts h
 
 diffs :: ([Int], [Int]) -> Int
-diffs (xs, ys) = sum $ map tupleDiff $ zip as bs
-  where
-    as = sort xs
-    bs = sort ys
-    tupleDiff (x, y) = abs $ x - y
+diffs (xs, ys) =
+    let diff = abs . uncurry (-)
+     in sum $ map diff $ zip (sort xs) (sort ys)
 
 scores :: [Int] -> Lookup -> Int
-scores ks m = sum $ map score ks
-  where
-    score k = k * (M.findWithDefault 0 k m)
+scores ks m =
+    let score k = k * (M.findWithDefault 0 k m)
+     in sum $ map score ks
 
 part1 :: String -> Int
 part1 input = diffs $ parse input
