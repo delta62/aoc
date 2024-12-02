@@ -1,20 +1,12 @@
-cabal-version:      3.0
-name:               aoc
-
--- The package version.
--- See the Haskell package versioning policy (PVP) for standards
--- guiding when and how versions should be incremented.
--- https://pvp.haskell.org
--- PVP summary:     +-+------- breaking API changes
---                  | | +----- non-breaking API additions
---                  | | | +--- code changes with no API change
-version:            0.1.0.0
-license:            MIT
-license-file:       LICENSE
-author:             Sam Noedel
-maintainer:         sam.noedel@gmail.com
-build-type:         Simple
-extra-doc-files:    CHANGELOG.md
+cabal-version:        3.0
+name:                 aoc
+version:              0.1.0.0
+license:              MIT
+license-file:         LICENSE
+author:               Sam Noedel
+maintainer:           sam.noedel@gmail.com
+build-type:           Simple
+extra-doc-files:      CHANGELOG.md
 
 common shared
     ghc-options:      -Wall
@@ -25,7 +17,8 @@ library
     import:           shared
     hs-source-dirs:   lib
     build-depends:    containers ^>=0.7
-    exposed-modules:  Day01
+    exposed-modules:  Day01, Day02
+    other-modules:    Util
 
 executable runner
     import:           shared
@@ -39,5 +32,5 @@ test-suite test
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     hs-source-dirs:   test
-    other-modules:    Day01Test
+    other-modules:    Day01Test, Day02Test
     build-depends:    aoc
