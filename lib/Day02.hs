@@ -6,10 +6,20 @@ diffList :: [Int] -> [Int]
 diffList = mapAdjacent (-)
 
 validPositive :: Int -> Bool
-validPositive x = x >= 1 && x <= 3
+validPositive x = x `elem` [1..3]
 
 validNegative :: Int -> Bool
-validNegative x = x >= -3 && x <= -1
+validNegative x = x `elem` [(-3)..(-1)]
+
+dropAt :: Int -> [a] -> [a]
+dropAt n xs =
+    let (ys,zs) = splitAt n xs
+     in ys ++ (tail zs)
+
+isKindaSafe :: [a] -> [[a]]
+isKindaSafe xs =
+    let len = pred $ length xs
+     in [dropAt n xs | n <- [0..len]]
 
 isSafe :: [Int] -> Bool
 isSafe xs = allPositive || allNegative
@@ -17,6 +27,9 @@ isSafe xs = allPositive || allNegative
     diffs = diffList xs
     allPositive = all validPositive diffs
     allNegative = all validNegative diffs
+
+isSafe' :: [Int] -> Bool
+isSafe' xs = isSafe xs || any isSafe (isKindaSafe xs)
 
 parse :: String -> [[Int]]
 parse = (map parseLine) . lines
@@ -26,3 +39,6 @@ parseLine = (map parseInt) . words
 
 part1 :: String -> Int
 part1 = (count isSafe) . parse
+
+part2 :: String -> Int
+part2 = (count isSafe') . parse
