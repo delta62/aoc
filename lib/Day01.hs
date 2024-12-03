@@ -4,17 +4,15 @@ module Day01 (parse, parse', part1, part2) where
 
 import Data.List (sort)
 import qualified Data.Map as M
+import Util (parseInt)
 
 type Lookup = M.Map Int Int
-
-parseStr :: String -> Int
-parseStr = read
 
 tuple :: [a] -> (a, a)
 tuple [x, y] = (x, y)
 
 parseLine :: String -> (Int, Int)
-parseLine s = tuple $ map parseStr $ words s
+parseLine s = tuple $ map parseInt $ words s
 
 parse :: String -> ([Int], [Int])
 parse s = unzip $ map parseLine $ lines s

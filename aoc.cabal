@@ -16,8 +16,8 @@ common shared
 library
     import:           shared
     hs-source-dirs:   lib
-    build-depends:    containers ^>=0.7
-    exposed-modules:  Day01, Day02
+    build-depends:    array ^>=0.5.4.0, containers ^>=0.7, regex-pcre ^>=0.95.0.0
+    exposed-modules:  Day01, Day02, Day03
     other-modules:    Util
 
 executable runner
@@ -32,5 +32,5 @@ test-suite test
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     hs-source-dirs:   test
-    other-modules:    Day01Test, Day02Test
+    other-modules:    Day01Test, Day02Test, Day03Test
     build-depends:    aoc
