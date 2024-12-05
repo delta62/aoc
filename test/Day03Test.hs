@@ -19,10 +19,10 @@ part1Test input = 161 @=? part1 input
 part2Test :: String -> Assertion
 part2Test input = 48 @=? part2 input
 
-part2Test' :: Test
-part2Test' = TestCase $ 4 @=? part2 "don't()\nmul(3,3)\ndo()\nmul(2,2)"
+multiLineTest :: Test
+multiLineTest = TestCase $ 4 @=? part2 "don't()\nmul(3,3)\ndo()\nmul(2,2)"
 
 tests :: Test
 tests = TestLabel "Day 3" $ TestList allTests
   where
-    allTests = [day3Test part1Test, day3p2Test part2Test, part2Test']
+    allTests = [day3Test part1Test, day3p2Test part2Test, multiLineTest]
